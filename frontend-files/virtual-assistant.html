@@ -144,48 +144,6 @@
     const form = document.getElementById('training-form');
     const chatbox = document.getElementById('chatbox');
 
-    /* form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const sport = document.getElementById('sport').value;
-        const experience = document.getElementById('experience').value;
-        const age = document.getElementById('age').value;
-
-        const userMessage = document.createElement('div');
-        userMessage.className = 'user-message';
-        userMessage.textContent = `Sport: ${sport}, Nivel de experienta: ${experience}, Varsta: ${age}`;
-        chatbox.appendChild(userMessage);
-
-        try {
-            const response = await fetch('http://localhost:3000/get-training-plan', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sport, experience, age }),
-            });
-
-            const data = await response.json();
-
-            const assistantMessage = document.createElement('div');
-            assistantMessage.className = 'assistant-message';
-            if (data.success && data.trainingPlan) {
-                // assistantMessage.textContent = data.trainingPlan;
-                assistantMessage.innerHTML = data.trainingPlan;
-            } else {
-                assistantMessage.textContent = data.message || 'Scuze, nu pot genera un program de antrenament acum.';
-            }
-
-            chatbox.appendChild(assistantMessage);
-
-            chatbox.scrollTop = chatbox.scrollHeight;
-        } catch (error) {
-            console.error('Error:', error);
-            const errorMessage = document.createElement('div');
-            errorMessage.className = 'assistant-message';
-            errorMessage.textContent = 'A apărut o eroare. Vă rugăm să încercați din nou mai târziu.';
-            chatbox.appendChild(errorMessage);
-        }
-    }); */
-
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -227,7 +185,7 @@ form.addEventListener('submit', async (e) => {
 
 function renderTrainingPlan(trainingPlan) {
     const container = document.querySelector('.training-plan-container');
-    container.innerHTML = ''; // Clear previous content
+    container.innerHTML = '';
 
     Object.entries(trainingPlan).forEach(([day, exercises]) => {
         const card = document.createElement('div');

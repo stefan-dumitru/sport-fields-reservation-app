@@ -473,21 +473,20 @@ app.post('/get-training-plan', async (req, res) => {
                     },
                     {
                         role: "user",
-                        content: `Creeaza un program de antrenament saptamanal pentru un jucator de ${sport}, avand nivelul de experienta ${experience} si cu varsta de ${age} ani. Trimite raspunsul in formatul urmator, cu fiecare exercitiu afisat pe o linie diferita si de asemenea un rand liber intre zile consecutive:
-                                    1. Luni
-                                    - Exercitiul 1
-                                    - Exercitiul 2
-                                    ...
+                        content: `Creeaza un program de antrenament saptamanal pentru un jucator de ${sport}, avand nivelul de experienta ${experience} si cu varsta de ${age} ani. 
+Formateaza raspunsul astfel:
+1. Luni
+  - Exercitiu 1
+  - Exercitiu 2
 
-                                    2. Marti
-                                    - Exercitiul 1
-                                    - Exercitiul 2
-                                    ...
+2. Marti
+  - Exercitiu 1
+  - Exercitiu 2
 
-                                    (Continua pentru restul saptamanii)`
+(Continua pentru restul saptamanii.)`
                     }
                 ],
-                max_tokens: 700,
+                max_tokens: 650,
             },
             {
                 headers: {
@@ -498,19 +497,21 @@ app.post('/get-training-plan', async (req, res) => {
 
         const rawTrainingPlan = response.data.choices[0].message.content;
 
-        // Split the response into sections by day
-        const days = rawTrainingPlan.split(/\n\s*\d\.\s/).slice(1); // Remove empty item from split
-        
+        console.log("Raw Training Plan : ", rawTrainingPlan);
+
+        const days = rawTrainingPlan.split(/\n(?=\d+\.\s?[A-Z][a-z]+)/).slice(1);
         const trainingPlan = {};
+
         days.forEach(daySection => {
-            const [dayLine, ...exerciseLines] = daySection.split('\n');
-            const dayName = dayLine.trim(); // Extract day name
+            const [dayLine, ...exerciseLines] = daySection.trim().split('\n');
+            const dayName = dayLine.replace(/^\d+\.\s?/, '').trim();
             const exercises = exerciseLines
-                .filter(line => line.startsWith('-')) // Only include exercise lines
-                .map(line => line.replace(/-\s/, '').trim()); // Remove "- " from exercises
-            
+                .map(line => line.replace(/^\s*-\s*/, '').trim())
+                .filter(line => line.length > 0);
             trainingPlan[dayName] = exercises;
         });
+
+        console.log("Final training plan:", trainingPlan);
 
         res.json({ success: true, trainingPlan });
     } catch (error) {
