@@ -108,9 +108,6 @@
     <h1 class="text-center mb-4">Asistent virtual pentru generarea unui program saptamanal de antrenament</h1>
     <div class="chatbox" id="chatbox">
         <!-- Aici vor fi afisate mesajele -->
-        <div class="training-plan-container">
-            <!-- Training Plan will be dynamically injected here -->
-        </div>
     </div>
     <form id="training-form">
         <div class="mb-3">
@@ -156,6 +153,18 @@ form.addEventListener('submit', async (e) => {
     userMessage.textContent = `Sport: ${sport}, Nivel de experienta: ${experience}, Varsta: ${age}`;
     chatbox.appendChild(userMessage);
 
+    const typingIndicator = document.createElement('div');
+    typingIndicator.className = 'assistant-message';
+    chatbox.appendChild(typingIndicator);
+
+    let dots = 0;
+    const typingInterval = setInterval(() => {
+        typingIndicator.textContent = `Generare program de antrenament${'.'.repeat(dots)}`;
+        dots = (dots + 1) % 4;
+    }, 500);
+
+    chatbox.scrollTop = chatbox.scrollHeight;
+
     try {
         const response = await fetch('http://localhost:3000/get-training-plan', {
             method: 'POST',
@@ -164,6 +173,9 @@ form.addEventListener('submit', async (e) => {
         });
 
         const data = await response.json();
+
+        clearInterval(typingInterval);
+        chatbox.removeChild(typingIndicator);
 
         if (data.success && data.trainingPlan) {
             renderTrainingPlan(data.trainingPlan);
@@ -176,6 +188,10 @@ form.addEventListener('submit', async (e) => {
 
     } catch (error) {
         console.error('Error:', error);
+
+        clearInterval(typingInterval);
+        chatbox.removeChild(typingIndicator);
+
         const errorMessage = document.createElement('div');
         errorMessage.className = 'assistant-message';
         errorMessage.textContent = 'A apărut o eroare. Vă rugăm să încercați din nou mai târziu.';
@@ -184,8 +200,8 @@ form.addEventListener('submit', async (e) => {
 });
 
 function renderTrainingPlan(trainingPlan) {
-    const container = document.querySelector('.training-plan-container');
-    container.innerHTML = '';
+    const assistantMessage = document.createElement('div');
+    assistantMessage.className = 'assistant-message';
 
     Object.entries(trainingPlan).forEach(([day, exercises]) => {
         const card = document.createElement('div');
@@ -204,8 +220,13 @@ function renderTrainingPlan(trainingPlan) {
             : `<p>No exercises scheduled.</p>`;
 
         card.appendChild(cardBody);
-        container.appendChild(card);
+        card.style.marginBottom = '10px';
+
+        assistantMessage.appendChild(card);
     });
+
+    chatbox.appendChild(assistantMessage);
+    chatbox.scrollTop = chatbox.scrollHeight;
 }
 </script>
 </body>

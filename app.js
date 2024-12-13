@@ -483,7 +483,7 @@ Formateaza raspunsul astfel:
   - Exercitiu 1
   - Exercitiu 2
 
-(Continua pentru restul saptamanii.)`
+(Continua asa pentru restul saptamanii. Raspunsul trebuie sa nu contina diacritice si sa inceapa cu o propozitie scurta)`
                     }
                 ],
                 max_tokens: 650,
