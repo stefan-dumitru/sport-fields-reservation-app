@@ -498,14 +498,21 @@ app.post('/get-training-plan', async (req, res) => {
 
         const rawTrainingPlan = response.data.choices[0].message.content;
 
-        const formattedTrainingPlan = rawTrainingPlan
-            .replace(/^(\d\.\s[^\n]+)/gm, '<h3>$1</h3>') // Convert days to <h3>, works for names with diacritics
-            .replace(/-\s(.+)/g, '<li>$1</li>')          // Convert list items to <li>
-            .replace(/(<h3>[^<]+<\/h3>)/g, '</ul>$1<ul>') // Wrap exercises in <ul>;
+        // Split the response into sections by day
+        const days = rawTrainingPlan.split(/\n\s*\d\.\s/).slice(1); // Remove empty item from split
+        
+        const trainingPlan = {};
+        days.forEach(daySection => {
+            const [dayLine, ...exerciseLines] = daySection.split('\n');
+            const dayName = dayLine.trim(); // Extract day name
+            const exercises = exerciseLines
+                .filter(line => line.startsWith('-')) // Only include exercise lines
+                .map(line => line.replace(/-\s/, '').trim()); // Remove "- " from exercises
+            
+            trainingPlan[dayName] = exercises;
+        });
 
-        const finalTrainingPlan = `<ul>${formattedTrainingPlan}</ul>`.replace('<ul></ul>', '');
-
-        res.json({ success: true, trainingPlan: finalTrainingPlan });
+        res.json({ success: true, trainingPlan });
     } catch (error) {
         console.error("Error fetching training plan:", error);
         res.status(500).json({ success: false, message: "Failed to fetch training plan." });
