@@ -458,8 +458,14 @@ app.get("/get-coordinates", async (req, res) => {
     }
 });
 
-app.post('/get-training-plan', async (req, res) => {
-    const { sport, experience, age } = req.body;
+app.get('/get-training-plan', async (req, res) => {
+    const { sport, experience, age } = req.query;
+
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    res.write(`data: ${JSON.stringify({ message: "Generating response..." })}\n\n`);
 
     try {
         const response = await axios.post(
@@ -497,8 +503,6 @@ Formateaza raspunsul astfel:
 
         const rawTrainingPlan = response.data.choices[0].message.content;
 
-        console.log("Raw Training Plan : ", rawTrainingPlan);
-
         const days = rawTrainingPlan.split(/\n(?=\d+\.\s?[A-Z][a-z]+)/).slice(1);
         const trainingPlan = {};
 
@@ -511,12 +515,12 @@ Formateaza raspunsul astfel:
             trainingPlan[dayName] = exercises;
         });
 
-        console.log("Final training plan:", trainingPlan);
-
-        res.json({ success: true, trainingPlan });
+        res.write(`data: ${JSON.stringify({ success: true, trainingPlan })}\n\n`);
+        res.end();
     } catch (error) {
         console.error("Error fetching training plan:", error);
-        res.status(500).json({ success: false, message: "Failed to fetch training plan." });
+        res.write(`data: ${JSON.stringify({ success: false, message: "Failed to fetch training plan." })}\n\n`);
+        res.end();
     }
 });
 

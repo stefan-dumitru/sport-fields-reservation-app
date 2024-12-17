@@ -1,7 +1,7 @@
 const form = document.getElementById('training-form');
 const chatbox = document.getElementById('chatbox');
 
-form.addEventListener('submit', async (e) => {
+form.addEventListener('submit', (e) => {
     e.preventDefault();
 
     const sport = document.getElementById('sport').value;
@@ -15,48 +15,39 @@ form.addEventListener('submit', async (e) => {
 
     const typingIndicator = document.createElement('div');
     typingIndicator.className = 'assistant-message';
+    typingIndicator.textContent = 'Connecting...';
     chatbox.appendChild(typingIndicator);
-
-    let dots = 0;
-    const typingInterval = setInterval(() => {
-        typingIndicator.textContent = `Generare program de antrenament${'.'.repeat(dots)}`;
-        dots = (dots + 1) % 4;
-    }, 500);
-
     chatbox.scrollTop = chatbox.scrollHeight;
 
-    try {
-        const response = await fetch('http://localhost:3000/get-training-plan', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sport, experience, age }),
-        });
+    const eventSource = new EventSource(`http://localhost:3000/get-training-plan?sport=${sport}&experience=${experience}&age=${age}`);
 
-        const data = await response.json();
+    eventSource.onmessage = (event) => {
+        const data = JSON.parse(event.data);
 
-        clearInterval(typingInterval);
-        chatbox.removeChild(typingIndicator);
-
-        if (data.success && data.trainingPlan) {
+        if (data.message) {
+            typingIndicator.textContent = data.message;
+        } else if (data.success && data.trainingPlan) {
+            chatbox.removeChild(typingIndicator);
             renderTrainingPlan(data.trainingPlan);
+            eventSource.close();
         } else {
+            chatbox.removeChild(typingIndicator);
             const errorMessage = document.createElement('div');
             errorMessage.className = 'assistant-message';
             errorMessage.textContent = data.message || 'Scuze, nu pot genera un program de antrenament acum.';
             chatbox.appendChild(errorMessage);
+            eventSource.close();
         }
+    };
 
-    } catch (error) {
-        console.error('Error:', error);
-
-        clearInterval(typingInterval);
+    eventSource.onerror = () => {
         chatbox.removeChild(typingIndicator);
-
         const errorMessage = document.createElement('div');
         errorMessage.className = 'assistant-message';
         errorMessage.textContent = 'A apărut o eroare. Vă rugăm să încercați din nou mai târziu.';
         chatbox.appendChild(errorMessage);
-    }
+        eventSource.close();
+    };
 });
 
 function renderTrainingPlan(trainingPlan) {
