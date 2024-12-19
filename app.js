@@ -467,6 +467,14 @@ app.get('/get-training-plan', async (req, res) => {
 
     res.write(`data: ${JSON.stringify({ message: "Generating response..." })}\n\n`);
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 26000);
+
+    req.on('close', () => {
+        clearTimeout(timeout);
+        controller.abort();
+    });
+
     try {
         const response = await axios.post(
             'https://api.openai.com/v1/chat/completions',
@@ -492,14 +500,17 @@ Formateaza raspunsul astfel:
 (Continua asa pentru restul saptamanii. Raspunsul trebuie sa nu contina diacritice si sa inceapa cu o propozitie scurta)`
                     }
                 ],
-                max_tokens: 650,
+                max_tokens: 500,
             },
             {
                 headers: {
                     'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
                 },
+                signal: controller.signal,
             }
         );
+
+        clearTimeout(timeout);
 
         const rawTrainingPlan = response.data.choices[0].message.content;
 
@@ -518,8 +529,13 @@ Formateaza raspunsul astfel:
         res.write(`data: ${JSON.stringify({ success: true, trainingPlan })}\n\n`);
         res.end();
     } catch (error) {
-        console.error("Error fetching training plan:", error);
-        res.write(`data: ${JSON.stringify({ success: false, message: "Failed to fetch training plan." })}\n\n`);
+        console.error("Error fetching training plan:", error.message || error);
+
+        if (error.name === 'AbortError') {
+            res.write(`data: ${JSON.stringify({ success: false, message: "No internet connection. Please try again." })}\n\n`);
+        } else {
+            res.write(`data: ${JSON.stringify({ success: false, message: "Failed to fetch training plan." })}\n\n`);
+        }
         res.end();
     }
 });

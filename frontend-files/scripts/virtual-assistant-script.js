@@ -4,6 +4,14 @@ const chatbox = document.getElementById('chatbox');
 form.addEventListener('submit', (e) => {
     e.preventDefault();
 
+    if (!navigator.onLine) {
+        const errorMessage = document.createElement('div');
+        errorMessage.className = 'assistant-message';
+        errorMessage.textContent = 'No internet connection. Please check your connection and try again.';
+        chatbox.appendChild(errorMessage);
+        return;
+    }
+
     const sport = document.getElementById('sport').value;
     const experience = document.getElementById('experience').value;
     const age = document.getElementById('age').value;
@@ -44,7 +52,9 @@ form.addEventListener('submit', (e) => {
         chatbox.removeChild(typingIndicator);
         const errorMessage = document.createElement('div');
         errorMessage.className = 'assistant-message';
-        errorMessage.textContent = 'A apărut o eroare. Vă rugăm să încercați din nou mai târziu.';
+        errorMessage.textContent = navigator.onLine
+            ? 'A apărut o eroare. Vă rugăm să încercați din nou mai târziu.'
+            : 'No internet connection. Please try again.';
         chatbox.appendChild(errorMessage);
         eventSource.close();
     };
