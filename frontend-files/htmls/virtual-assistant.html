@@ -46,6 +46,42 @@
             background-color: #e8e8e8;
             align-self: flex-start;
         }
+        .typing-animation {
+            display: none;
+            gap: 5px;
+            align-items: center;
+            justify-content: flex-start; 
+            align-self: flex-start;
+            height: 50px;
+            margin-left: 10px;
+        }
+        .typing-animation span {
+            width: 10px;
+            height: 10px;
+            background-color: #007bff;
+            border-radius: 50%;
+            animation: wave 1.2s infinite;
+        }
+        .typing-animation span:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .typing-animation span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-animation span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes wave {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
+        }
     </style>
 </head>
 <body class="bg-light">
@@ -108,6 +144,11 @@
     <h1 class="text-center mb-4">Asistent virtual pentru generarea unui program saptamanal de antrenament</h1>
     <div class="chatbox" id="chatbox">
         <!-- Aici vor fi afisate mesajele -->
+        <div class="typing-animation">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
     </div>
     <form id="training-form">
         <div class="mb-3">

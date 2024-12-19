@@ -21,25 +21,27 @@ form.addEventListener('submit', (e) => {
     userMessage.textContent = `Sport: ${sport}, Nivel de experienta: ${experience}, Varsta: ${age}`;
     chatbox.appendChild(userMessage);
 
-    const typingIndicator = document.createElement('div');
-    typingIndicator.className = 'assistant-message';
-    typingIndicator.textContent = 'Connecting...';
-    chatbox.appendChild(typingIndicator);
     chatbox.scrollTop = chatbox.scrollHeight;
+
+    const typingAnimation = document.createElement('div');
+    typingAnimation.className = 'typing-animation';
+    typingAnimation.innerHTML = '<span></span><span></span><span></span>';
+    
+    typingAnimation.style.display = "flex";
+    chatbox.appendChild(typingAnimation);
 
     const eventSource = new EventSource(`http://localhost:3000/get-training-plan?sport=${sport}&experience=${experience}&age=${age}`);
 
     eventSource.onmessage = (event) => {
         const data = JSON.parse(event.data);
 
-        if (data.message) {
-            typingIndicator.textContent = data.message;
-        } else if (data.success && data.trainingPlan) {
-            chatbox.removeChild(typingIndicator);
+        if (data.success && data.trainingPlan) {
+            typingAnimation.style.display = "none";
+
             renderTrainingPlan(data.trainingPlan);
             eventSource.close();
         } else {
-            chatbox.removeChild(typingIndicator);
+            typingAnimation.style.display = "none";
             const errorMessage = document.createElement('div');
             errorMessage.className = 'assistant-message';
             errorMessage.textContent = data.message || 'Scuze, nu pot genera un program de antrenament acum.';
@@ -49,7 +51,7 @@ form.addEventListener('submit', (e) => {
     };
 
     eventSource.onerror = () => {
-        chatbox.removeChild(typingIndicator);
+        typingAnimation.style.display = "none";
         const errorMessage = document.createElement('div');
         errorMessage.className = 'assistant-message';
         errorMessage.textContent = navigator.onLine

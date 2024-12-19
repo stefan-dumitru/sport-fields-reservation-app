@@ -465,10 +465,9 @@ app.get('/get-training-plan', async (req, res) => {
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
 
-    res.write(`data: ${JSON.stringify({ message: "Generating response..." })}\n\n`);
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 26000);
+    const timeout = setTimeout(() => controller.abort(), 25000);
 
     req.on('close', () => {
         clearTimeout(timeout);
@@ -534,7 +533,7 @@ Formateaza raspunsul astfel:
         if (error.name === 'AbortError') {
             res.write(`data: ${JSON.stringify({ success: false, message: "No internet connection. Please try again." })}\n\n`);
         } else {
-            res.write(`data: ${JSON.stringify({ success: false, message: "Failed to fetch training plan." })}\n\n`);
+            res.write(`data: ${JSON.stringify({ success: false, message: "Failed to retrieve training plan." })}\n\n`);
         }
         res.end();
     }
