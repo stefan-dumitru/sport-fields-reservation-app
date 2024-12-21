@@ -1,3 +1,9 @@
+function addHours(date, hours) {
+    const newDate = new Date(date);
+    newDate.setHours(newDate.getHours() + hours);
+    return newDate;
+}
+
 document.getElementById("search-form").addEventListener("submit", async (event) => {
     event.preventDefault();
 
@@ -64,8 +70,12 @@ document.getElementById("search-form").addEventListener("submit", async (event) 
                             reservationsList.innerHTML = "<strong>Rezervari existente:</strong>";
             
                             result.reservations.forEach((reservation) => {
+                                const formattedDate = addHours(new Date(reservation.data_rezervare), 2).toISOString().split('T')[0];
+                                const startTime = new Date(reservation.ora_inceput).toTimeString().split(' ')[0];
+                                const endTime = new Date(reservation.ora_sfarsit).toTimeString().split(' ')[0];
+
                                 const listItem = document.createElement("li");
-                                listItem.textContent = `Data: ${reservation.data_rezervare}, Interval: ${reservation.ora_inceput} - ${reservation.ora_sfarsit}`;
+                                listItem.textContent = `Data: ${formattedDate}, Interval: ${startTime} - ${endTime}`;
                                 reservationsList.appendChild(listItem);
                             });
                         } else {
