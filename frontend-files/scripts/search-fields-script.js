@@ -27,12 +27,10 @@ document.getElementById("search-form").addEventListener("submit", async (event) 
                 const row = document.createElement("tr");
 
                 row.innerHTML = `
-                    
                     <td>${field.denumire_sport}</td>
                     <td>${field.adresa}</td>
                     <td>${field.pret_ora}</td>
                     <td>${field.denumire_teren}</td>
-                    
                     <td>
                         <button class="make-reservation-btn" 
                                 data-field-id="${field.id_teren}" 
@@ -46,17 +44,43 @@ document.getElementById("search-form").addEventListener("submit", async (event) 
             });
 
             document.querySelectorAll(".make-reservation-btn").forEach((button) => {
-                button.addEventListener("click", () => {
+                button.addEventListener("click", async () => {
                     const modal = document.getElementById("reservation-modal");
                     const scheduleDisplay = document.getElementById("field-schedule");
-
+                    const reservationsList = document.createElement("ul");
+            
                     selectedFieldId = button.dataset.fieldId;
                     selectedFieldSchedule = button.dataset.schedule;
-                    scheduleDisplay.textContent = `Programul terenului: ${selectedFieldSchedule}`;
 
+                    try {
+                        const id_teren = selectedFieldId;
+                        const response = await fetch(`http://localhost:3000/get-field-reservations/${id_teren}`);
+
+                        scheduleDisplay.textContent = `Programul terenului: ${selectedFieldSchedule}`;
+            
+                        const result = await response.json();
+            
+                        if (result.success && result.reservations.length > 0) {
+                            reservationsList.innerHTML = "<strong>Rezervari existente:</strong>";
+            
+                            result.reservations.forEach((reservation) => {
+                                const listItem = document.createElement("li");
+                                listItem.textContent = `Data: ${reservation.data_rezervare}, Interval: ${reservation.ora_inceput} - ${reservation.ora_sfarsit}`;
+                                reservationsList.appendChild(listItem);
+                            });
+                        } else {
+                            reservationsList.innerHTML = "<strong>No future reservations available for this field.</strong>";
+                        }
+            
+                        scheduleDisplay.appendChild(reservationsList);
+                    } catch (error) {
+                        console.error("Error fetching reservations:", error);
+                        scheduleDisplay.textContent = "An error occurred while fetching reservations.";
+                    }
+            
                     modal.style.display = "block";
                 });
-            });
+            });            
         } else {
             tbody.innerHTML = "<tr><td colspan='7'>No fields found matching the criteria.</td></tr>";
         }

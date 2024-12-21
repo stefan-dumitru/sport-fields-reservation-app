@@ -20,12 +20,12 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 const db = mysql.createConnection({
-  host: process.env.HOST,
-  user: process.env.USER,
-  password: process.env.PASSWORD,
-  database: process.env.DATABASE
+    host: process.env.HOST,
+    user: process.env.USER,
+    password: process.env.PASSWORD,
+    database: process.env.DATABASE
 });
-
+  
 db.connect((err) => {
   if (err) throw err;
   console.log('Connected to MySQL database!');
@@ -417,6 +417,38 @@ app.post("/make-reservation", async (req, res) => {
             res.json({ success: true, message: "Reservation made successfully!" });
         }
     });
+});
+
+function getFutureReservations(id_teren) {
+    return new Promise((resolve, reject) => {
+        db.query(
+            `SELECT data_rezervare, ora_inceput, ora_sfarsit
+              FROM REZERVARI
+              WHERE id_teren = ? AND data_rezervare >= CURDATE()
+              ORDER BY data_rezervare, ora_inceput`,
+            [id_teren],
+            (err, results) => {
+                if (err) {
+                    console.error('Error fetching reservations:', err);
+                    return reject(err);
+                }
+                resolve(results);
+            }
+        );
+    });
+}
+
+app.get('/get-field-reservations/:id_teren', async (req, res) => {
+    try {
+        const { id_teren } = req.params;
+
+        const reservations = await getFutureReservations(id_teren);
+
+        res.json({ success: true, reservations });
+    } catch (err) {
+        console.error('Error in /get-field-reservations route:', err);
+        res.status(500).json({ success: false, message: 'Failed to fetch reservations.' });
+    }
 });
 
 app.get("/get-sports-fields", (_req, res) => {
