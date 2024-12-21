@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const mysql = require('mysql2');
-const axios = require("axios");
+const axios = require('axios');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
@@ -220,7 +220,7 @@ app.get('/get-statut/:username', async (req, res) => {
   });
 });
 
-app.post('/add-terrain', async (req, res) => {
+app.post('/add-field', async (req, res) => {
   const { username, denumire_sport, adresa, pret_ora, denumire_teren, program } = req.body;
 
   const id_teren = Math.floor(Math.random() * 1000000); 

@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const program = document.getElementById("program").value;
 
         try {
-            const response = await fetch("http://localhost:3000/add-terrain", {
+            const response = await fetch("http://localhost:3000/add-field", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username, denumire_sport: denumireSport, adresa, pret_ora: pretOra, denumire_teren: denumireTeren, program })
