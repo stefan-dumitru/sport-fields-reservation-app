@@ -377,6 +377,31 @@ app.post('/search-fields', (req, res) => {
   });
 });
 
+function getFutureReservations(id_teren) {
+    return new Promise((resolve, reject) => {
+        db.query(
+            `SELECT data_rezervare, ora_inceput, ora_sfarsit
+              FROM REZERVARI
+              WHERE id_teren = ? AND data_rezervare >= CURDATE()
+              ORDER BY data_rezervare, ora_inceput`,
+            [id_teren],
+            (err, results) => {
+                if (err) {
+                    console.error('Error fetching reservations:', err);
+                    return reject(err);
+                }
+                resolve(results);
+            }
+        );
+    });
+}
+
+function addHours(date, hours) {
+    const newDate = new Date(date);
+    newDate.setHours(newDate.getHours() + hours);
+    return newDate;
+}
+
 app.post("/make-reservation", async (req, res) => {
     const { id_teren, data_rezervare, ora_inceput, ora_sfarsit, username } = req.body;
 
@@ -404,39 +429,50 @@ app.post("/make-reservation", async (req, res) => {
         return res.json({ success: false, message: "Username is required to make a reservation." });
     }
 
-    const query = `
-        INSERT INTO rezervari (id_rezervare, username_sportiv, id_teren, data_rezervare, ora_inceput, ora_sfarsit)
-        VALUES (?, ?, ?, ?, ?, ?)
-    `;
+    const newOra_inceput_rezervare = new Date(ora_inceput).toTimeString().split(' ')[0];
+    const newOra_sfarsit_rezervare = new Date(ora_sfarsit).toTimeString().split(' ')[0];
+    const newDate = reservationDate.toISOString().split("T")[0];
 
-    db.query(query, [id_rezervare, username, id_teren, data_rezervare, ora_inceput, ora_sfarsit], (err) => {
-        if (err) {
-            console.error("Error inserting reservation:", err);
-            res.json({ success: false, message: "Error making reservation." });
-        } else {
-            res.json({ success: true, message: "Reservation made successfully!" });
-        }
-    });
-});
+    try {
+        const reservations = await getFutureReservations(id_teren);
 
-function getFutureReservations(id_teren) {
-    return new Promise((resolve, reject) => {
-        db.query(
-            `SELECT data_rezervare, ora_inceput, ora_sfarsit
-              FROM REZERVARI
-              WHERE id_teren = ? AND data_rezervare >= CURDATE()
-              ORDER BY data_rezervare, ora_inceput`,
-            [id_teren],
-            (err, results) => {
-                if (err) {
-                    console.error('Error fetching reservations:', err);
-                    return reject(err);
-                }
-                resolve(results);
+        const conflict = reservations.some((reservation) => {
+            const existingDate = addHours(new Date(reservation.data_rezervare), 2).toISOString().split('T')[0];
+            const startTime = new Date(reservation.ora_inceput).toTimeString().split(' ')[0];
+            const endTime = new Date(reservation.ora_sfarsit).toTimeString().split(' ')[0];
+
+            if (existingDate === newDate) {
+                return (
+                    (newOra_inceput_rezervare >= startTime && newOra_inceput_rezervare < endTime) ||
+                    (newOra_sfarsit_rezervare > startTime && newOra_sfarsit_rezervare <= endTime) ||
+                    (newOra_inceput_rezervare <= startTime && newOra_sfarsit_rezervare >= endTime)
+                );
             }
-        );
-    });
-}
+            return false;
+        });
+
+        if (conflict) {
+            return res.json({ success: false, message: "Terenul nu este disponibil in acest interval de timp!" });
+        }
+
+        const query = `
+            INSERT INTO rezervari (id_rezervare, username_sportiv, id_teren, data_rezervare, ora_inceput, ora_sfarsit)
+            VALUES (?, ?, ?, ?, ?, ?)
+        `;
+
+        db.query(query, [id_rezervare, username, id_teren, data_rezervare, ora_inceput, ora_sfarsit], (err) => {
+            if (err) {
+                console.error("Error inserting reservation:", err);
+                res.json({ success: false, message: "Error making reservation." });
+            } else {
+                res.json({ success: true, message: "Reservation made successfully!" });
+            }
+        });
+    } catch (err) {
+        console.error("Error processing reservation:", err);
+        res.status(500).json({ success: false, message: "Failed to process reservation." });
+    }
+});
 
 app.get('/get-field-reservations/:id_teren', async (req, res) => {
     try {
