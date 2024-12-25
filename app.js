@@ -221,7 +221,7 @@ app.get('/get-statut/:username', async (req, res) => {
 });
 
 app.post('/add-field', async (req, res) => {
-  const { username, denumire_sport, adresa, pret_ora, denumire_teren, program } = req.body;
+  const { username, denumire_sport, adresa, pret_ora, denumire_teren, program, sector } = req.body;
 
   const id_teren = Math.floor(Math.random() * 1000000); 
 
@@ -234,11 +234,12 @@ app.post('/add-field', async (req, res) => {
 
       if (result.length > 0) {
           const statut = result[0].statut === 1 ? 'confirmat' : 'asteptare';
+          const oras = 'Bucharest';
           const insertQuery = `
-              INSERT INTO terenuri_sportive (id_teren, denumire_sport, adresa, pret_ora, statut, denumire_teren, program)
-              VALUES (?, ?, ?, ?, ?, ?, ?)
+              INSERT INTO terenuri_sportive (id_teren, denumire_sport, adresa, pret_ora, statut, denumire_teren, program, oras, sector)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
           `;
-          db.query(insertQuery, [id_teren, denumire_sport, adresa, pret_ora, statut, denumire_teren, program], (err) => {
+          db.query(insertQuery, [id_teren, denumire_sport, adresa, pret_ora, statut, denumire_teren, program, oras, sector], (err) => {
               if (err) {
                   console.error('Error inserting field:', err);
                   return res.status(500).json({ success: false, message: 'An error occurred.' });
@@ -257,7 +258,7 @@ app.post('/add-field', async (req, res) => {
 });
 
 app.get('/pending-fields', (_req, res) => {
-  const query = `SELECT id_teren, denumire_sport, adresa, pret_ora, denumire_teren, program 
+  const query = `SELECT id_teren, denumire_sport, adresa, pret_ora, denumire_teren, program, sector 
                  FROM terenuri_sportive 
                  WHERE statut = 'asteptare'`;
   db.query(query, (err, result) => {
@@ -343,9 +344,9 @@ app.delete('/cancel-reservation/:id', (req, res) => {
 });
 
 app.post('/search-fields', (req, res) => {
-  const { sport, price, startTime, endTime } = req.body;
+  const { sport, price, sector } = req.body;
 
-  let query = `SELECT id_teren, denumire_sport, adresa, pret_ora, denumire_teren, program 
+  let query = `SELECT id_teren, denumire_sport, adresa, pret_ora, denumire_teren, program, sector 
                FROM terenuri_sportive WHERE statut = 'confirmat'`;
   const params = [];
 
@@ -360,11 +361,9 @@ app.post('/search-fields', (req, res) => {
       params.push(min, max);
   }
 
-  if (startTime && endTime) {
-      query += ` AND (program = 'non-stop' OR 
-                      (SUBSTRING_INDEX(program, ' - ', 1) <= ? AND 
-                       SUBSTRING_INDEX(program, ' - ', -1) >= ?))`;
-      params.push(startTime, endTime);
+  if (sector) {
+      query += ` AND sector = ?`;
+      params.push(sector);
   }
 
   db.query(query, params, (err, result) => {

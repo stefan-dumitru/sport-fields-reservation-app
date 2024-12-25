@@ -9,19 +9,20 @@ document.getElementById("search-form").addEventListener("submit", async (event) 
 
     const sport = document.getElementById("sport").value;
     const price = document.getElementById("price").value;
-    const startTime = document.getElementById("start-time").value;
-    const endTime = document.getElementById("end-time").value;
+    // const startTime = document.getElementById("start-time").value;
+    // const endTime = document.getElementById("end-time").value;
+    const sector = document.getElementById("sector").value;
 
-    if (startTime && endTime && startTime >= endTime) {
-        alert("Start time must be earlier than end time!");
-        return;
-    }
+    // if (startTime && endTime && startTime >= endTime) {
+    //     alert("Start time must be earlier than end time!");
+    //     return;
+    // }
 
     try {
         const response = await fetch("http://localhost:3000/search-fields", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ sport, price, startTime, endTime }),
+            body: JSON.stringify({ sport, price, sector }),
         });
 
         const data = await response.json();
@@ -37,6 +38,7 @@ document.getElementById("search-form").addEventListener("submit", async (event) 
                     <td>${field.adresa}</td>
                     <td>${field.pret_ora}</td>
                     <td>${field.denumire_teren}</td>
+                    <td>${field.sector}</td>
                     <td>
                         <button class="make-reservation-btn" 
                                 data-field-id="${field.id_teren}" 

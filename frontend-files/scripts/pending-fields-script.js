@@ -34,6 +34,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     <td>${field.pret_ora}</td>
                     <td>${field.denumire_teren}</td>
                     <td>${field.program}</td>
+                    <td>${field.sector}</td>
                     <td>
                         <button class="btn btn-success confirm-btn" ${isTrusted ? "" : "disabled"}>
                             Confirma teren

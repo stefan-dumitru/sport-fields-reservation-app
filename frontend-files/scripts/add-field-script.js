@@ -15,12 +15,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const pretOra = document.getElementById("pretOra").value;
         const denumireTeren = document.getElementById("denumireTeren").value;
         const program = document.getElementById("program").value;
+        const sector = document.getElementById("sector").value;
 
         try {
             const response = await fetch("http://localhost:3000/add-field", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, denumire_sport: denumireSport, adresa, pret_ora: pretOra, denumire_teren: denumireTeren, program })
+                body: JSON.stringify({ username, denumire_sport: denumireSport, adresa, pret_ora: pretOra, denumire_teren: denumireTeren, program, sector })
             });
 
             const data = await response.json();

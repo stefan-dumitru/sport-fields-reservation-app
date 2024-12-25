@@ -130,15 +130,17 @@
                             <option value="101-150">101 - 150</option>
                             <option value="150+">Mai mult decat 150</option>
                         </select>
-                
-                        <div class="form-group">
-                            <label for="start-time">Ora inceput:</label>
-                            <input type="time" id="start-time" name="start-time" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label for="end-time">Ora sfarsit:</label>
-                            <input type="time" id="end-time" name="end-time" class="form-control">
-                        </div>
+
+                        <label for="sector">Sector:</label>
+                        <select id="sector" name="sector" class="form-control">
+                            <option value="">Any</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                        </select>
 
                         <div id="error-message" style="color: red; display: none;"></div>
 
@@ -155,6 +157,7 @@
                                 <th>Adresa</th>
                                 <th>Pret/ora</th>
                                 <th>Denumire</th>
+                                <th>Sector</th>
                                 <th>Rezerva teren</th>
                             </tr>
                         </thead>
