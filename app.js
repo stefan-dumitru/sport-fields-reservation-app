@@ -343,8 +343,8 @@ app.delete('/cancel-reservation/:id', (req, res) => {
   });
 });
 
-app.post('/search-fields', (req, res) => {
-  const { sport, price, sector } = req.body;
+app.post('/search-fields', async (req, res) => {
+  const { sport, sector } = req.body;
 
   let query = `SELECT id_teren, denumire_sport, adresa, pret_ora, denumire_teren, program, sector 
                FROM terenuri_sportive WHERE statut = 'confirmat'`;
@@ -355,25 +355,31 @@ app.post('/search-fields', (req, res) => {
       params.push(sport);
   }
 
-  if (price) {
-      const [min, max] = price === "150+" ? [151, 10000] : price.split("-").map(Number);
-      query += ` AND pret_ora BETWEEN ? AND ?`;
-      params.push(min, max);
-  }
-
   if (sector) {
       query += ` AND sector = ?`;
       params.push(sector);
   }
 
-  db.query(query, params, (err, result) => {
-      if (err) {
-          console.error("Error fetching fields:", err);
-          res.status(500).json({ success: false, message: "An error occurred. Please try again." });
-      } else {
-          res.json({ success: true, fields: result });
-      }
-  });
+  try {
+      const fields = await new Promise((resolve, reject) => {
+          db.query(query, params, (err, result) => {
+              if (err) return reject(err);
+              resolve(result);
+          });
+      });
+
+      const fieldReservations = await Promise.all(
+          fields.map(async (field) => {
+              const reservations = await getFutureReservations(field.id_teren);
+              return { ...field, reservations };
+          })
+      );
+
+      res.json({ success: true, fields: fieldReservations });
+  } catch (error) {
+      console.error("Error fetching fields:", error);
+      res.status(500).json({ success: false, message: "An error occurred. Please try again." });
+  }
 });
 
 function getFutureReservations(id_teren) {
@@ -381,7 +387,7 @@ function getFutureReservations(id_teren) {
         db.query(
             `SELECT data_rezervare, ora_inceput, ora_sfarsit
               FROM REZERVARI
-              WHERE id_teren = ? AND data_rezervare >= CURDATE()
+              WHERE id_teren = ?
               ORDER BY data_rezervare, ora_inceput`,
             [id_teren],
             (err, results) => {
@@ -395,12 +401,6 @@ function getFutureReservations(id_teren) {
     });
 }
 
-function addHours(date, hours) {
-    const newDate = new Date(date);
-    newDate.setHours(newDate.getHours() + hours);
-    return newDate;
-}
-
 app.post("/make-reservation", async (req, res) => {
     const { id_teren, data_rezervare, ora_inceput, ora_sfarsit, username } = req.body;
 
@@ -412,6 +412,9 @@ app.post("/make-reservation", async (req, res) => {
     const parsedStartTime = new Date(ora_inceput);
     const newOra_inceput = `${parsedStartTime.getHours().toString().padStart(2, "0")}:${parsedStartTime.getMinutes().toString().padStart(2, "0")}`;
 
+    const oraInceputDatetime = `${data_rezervare} ${ora_inceput}:00`;
+    const oraSfarsitDatetime = `${data_rezervare} ${ora_sfarsit}:00`;
+    
     if (reservationDate < today.setHours(0, 0, 0, 0)) {
         return res.json({ success: false, message: "Nu poti face rezervari pentru zilele din trecut!" });
     }
@@ -420,46 +423,13 @@ app.post("/make-reservation", async (req, res) => {
         return res.json({ success: false, message: "Nu poti face rezervari inainte de ora de astazi!" });
     }
 
-    if (ora_inceput >= ora_sfarsit) {
-        return res.json({ success: false, message: "Ora de start trebuie sa fie inainte de ora de sfarsit!" });
-    }
-
-    if (!username) {
-        return res.json({ success: false, message: "Username is required to make a reservation." });
-    }
-
-    const newOra_inceput_rezervare = new Date(ora_inceput).toTimeString().split(' ')[0];
-    const newOra_sfarsit_rezervare = new Date(ora_sfarsit).toTimeString().split(' ')[0];
-    const newDate = reservationDate.toISOString().split("T")[0];
-
     try {
-        const reservations = await getFutureReservations(id_teren);
-
-        const conflict = reservations.some((reservation) => {
-            const existingDate = addHours(new Date(reservation.data_rezervare), 2).toISOString().split('T')[0];
-            const startTime = new Date(reservation.ora_inceput).toTimeString().split(' ')[0];
-            const endTime = new Date(reservation.ora_sfarsit).toTimeString().split(' ')[0];
-
-            if (existingDate === newDate) {
-                return (
-                    (newOra_inceput_rezervare >= startTime && newOra_inceput_rezervare < endTime) ||
-                    (newOra_sfarsit_rezervare > startTime && newOra_sfarsit_rezervare <= endTime) ||
-                    (newOra_inceput_rezervare <= startTime && newOra_sfarsit_rezervare >= endTime)
-                );
-            }
-            return false;
-        });
-
-        if (conflict) {
-            return res.json({ success: false, message: "Terenul nu este disponibil in acest interval de timp!" });
-        }
-
         const query = `
             INSERT INTO rezervari (id_rezervare, username_sportiv, id_teren, data_rezervare, ora_inceput, ora_sfarsit)
             VALUES (?, ?, ?, ?, ?, ?)
         `;
 
-        db.query(query, [id_rezervare, username, id_teren, data_rezervare, ora_inceput, ora_sfarsit], (err) => {
+        db.query(query, [id_rezervare, username, id_teren, data_rezervare, oraInceputDatetime, oraSfarsitDatetime], (err) => {
             if (err) {
                 console.error("Error inserting reservation:", err);
                 res.json({ success: false, message: "Error making reservation." });
