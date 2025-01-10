@@ -1,3 +1,7 @@
+let isDragging = false;
+let startCell = null;
+let selectedCells = [];
+
 function addHours(date, hours) {
     const newDate = new Date(date);
     newDate.setHours(newDate.getHours() + hours);
@@ -111,6 +115,7 @@ document.getElementById("search-form").addEventListener("submit", async (event) 
         const row = document.createElement("tr");
         const timeCell = document.createElement("td");
         timeCell.textContent = `${startHour}:00 - ${endHour}:00`;
+        timeCell.setAttribute("data-time-cell", "true");
         row.appendChild(timeCell);
 
         fieldReservations.forEach((field) => {
@@ -120,52 +125,134 @@ document.getElementById("search-form").addEventListener("submit", async (event) 
                 (r) => r.data_rezervare === selectedDate
             );
         
+            cell.setAttribute("data-hour", startHour);
+            cell.setAttribute("data-field-id", field.id_teren);
+        
             if (isWithinSchedule(i, field.program)) {
                 if (isReserved(hourString, reservationsForDate)) {
                     cell.style.backgroundColor = "red";
-                } else {
-                    cell.style.backgroundColor = "green";                       
-                    cell.addEventListener("click", async () => {
-                        const confirmReservation = confirm("Esti sigur ca vrei sa faci rezervarea?");
 
-                        if (confirmReservation) {
-                            const username = localStorage.getItem("username");
-                            const reservationDetails = {
-                                id_teren: field.id_teren,
-                                data_rezervare: selectedDate,
-                                ora_inceput: `${startHour}:00`,
-                                ora_sfarsit: `${endHour}:00`,
-                                username,
-                            };
-        
-                            try {
-                                const response = await fetch("http://localhost:3000/make-reservation", {
-                                    method: "POST",
-                                    headers: { "Content-Type": "application/json" },
-                                    body: JSON.stringify(reservationDetails),
-                                });
-        
-                                const result = await response.json();
-                                if (result.success) {
-                                    alert("Reservation made successfully!");
-                                    cell.style.backgroundColor = "red";
-                                    location.reload();
-                                } else {
-                                    alert(result.message || "Failed to make reservation.");
-                                }
-                            } catch (error) {
-                                console.error("Error making reservation:", error);
-                                alert("An error occurred while making the reservation.");
+                    cell.addEventListener("mousemove", () => {
+                        if (isDragging) {        
+                            if (cell.style.backgroundColor === "red") {
+                                isDragging = false;
+                                alert("Dragging stopped due to invalid cell (reserved).");
+                                selectedCells.forEach((c) => (c.style.backgroundColor = "green"));
+                                selectedCells = [];
                             }
+                        }
+                    });
+                } else {
+                    cell.style.backgroundColor = "green";
+        
+                    cell.addEventListener("mousedown", () => {
+                        if (cell.style.backgroundColor === "green") {
+                            isDragging = true;
+                            startCell = { cell, startHour, fieldId: field.id_teren };
+                            selectedCells.push(cell);
+                            cell.style.backgroundColor = "yellow";
+                        }
+                    });
+        
+                    cell.addEventListener("mousemove", () => {
+                        if (isDragging) {
+                            const currentFieldId = cell.getAttribute("data-field-id");
+        
+                            if (parseInt(currentFieldId) !== startCell.fieldId) {
+                                isDragging = false;
+                                alert("You can only select cells from the same field.");
+                                selectedCells.forEach((c) => (c.style.backgroundColor = "green"));
+                                selectedCells = [];
+                                return;
+                            }
+        
+                            if (cell.style.backgroundColor === "green" && !selectedCells.includes(cell)) {
+                                selectedCells.push(cell);
+                                cell.style.backgroundColor = "yellow";
+                            }
+                        }
+                    });
+        
+                    cell.addEventListener("mouseup", async () => {
+                        if (isDragging) {
+                            isDragging = false;
+        
+                            const endCell = selectedCells[selectedCells.length - 1];
+                            const startHour = startCell.startHour;
+                            const endHour = endCell.dataset.hour;
+        
+                            const confirmReservation = confirm(
+                                `Do you want to reserve from ${startHour}:00 to ${parseInt(endHour) + 1}:00?`
+                            );
+        
+                            if (confirmReservation) {
+                                const username = localStorage.getItem("username");
+                                const reservationDetails = {
+                                    id_teren: field.id_teren,
+                                    data_rezervare: selectedDate,
+                                    ora_inceput: `${startHour}:00`,
+                                    ora_sfarsit: `${parseInt(endHour) + 1}:00`,
+                                    username,
+                                };
+        
+                                try {
+                                    const response = await fetch(
+                                        "http://localhost:3000/make-reservation",
+                                        {
+                                            method: "POST",
+                                            headers: { "Content-Type": "application/json" },
+                                            body: JSON.stringify(reservationDetails),
+                                        }
+                                    );
+        
+                                    const result = await response.json();
+                                    if (result.success) {
+                                        alert("Reservation made successfully!");
+                                        selectedCells.forEach(
+                                            (c) => (c.style.backgroundColor = "red")
+                                        );
+                                        location.reload();
+                                    } else {
+                                        alert(result.message || "Failed to make reservation.");
+                                        selectedCells.forEach(
+                                            (c) => (c.style.backgroundColor = "green")
+                                        );
+                                    }
+                                } catch (error) {
+                                    console.error("Error making reservation:", error);
+                                    alert("An error occurred while making the reservation.");
+                                    selectedCells.forEach(
+                                        (c) => (c.style.backgroundColor = "green")
+                                    );
+                                }
+                            } else {
+                                selectedCells.forEach(
+                                    (c) => (c.style.backgroundColor = "green")
+                                );
+                            }
+        
+                            selectedCells = [];
+                            startCell = null;
                         }
                     });
                 }
             } else {
                 cell.style.backgroundColor = "gray";
+
+                cell.addEventListener("mousemove", () => {
+                    if (isDragging) {        
+                        if (cell.style.backgroundColor === "gray") {
+                            isDragging = false;
+                            alert("Dragging stopped due to invalid cell (closed).");
+                            selectedCells.forEach((c) => (c.style.backgroundColor = "green"));
+                            selectedCells = [];
+                        }
+                    }
+                });
             }
         
             row.appendChild(cell);
-        });
+        });        
 
         resultsBody.appendChild(row);
     }

@@ -23,6 +23,10 @@
             overflow-y: hidden; /* Prevent vertical scrolling */
             white-space: nowrap; /* Prevent line breaks inside the table */
         }
+        [data-time-cell="true"] {
+            user-select: none;
+            pointer-events: none; /* Optional: Prevent interaction */
+        }
     </style>
 </head>
 <body class="bg-light">
