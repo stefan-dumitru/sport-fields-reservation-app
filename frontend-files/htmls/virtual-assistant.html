@@ -141,7 +141,7 @@
 </nav>
 
 <div class="chat-container">
-    <h1 class="text-center mb-4">Asistent virtual pentru generarea unui program saptamanal de antrenament</h1>
+    <h1 class="text-center mb-4">Asistent virtual pentru generarea unui program săptămânal de antrenament</h1>
     <div class="chatbox" id="chatbox">
         <!-- Aici vor fi afisate mesajele -->
         <div class="typing-animation">
@@ -161,23 +161,166 @@
             </select>
         </div>
         <div class="mb-3">
-            <label for="experience" class="form-label">Nivel de experienta</label>
+            <label for="experience" class="form-label">Cât de des ai practicat acest sport până acum?</label>
             <select id="experience" class="form-select" required>
-                <option value="">Alege un nivel...</option>
-                <option value="incepator">Incepator</option>
-                <option value="mediu">Mediu</option>
-                <option value="avansat">Avansat</option>
+                <option value="">Alege o variantă...</option>
+                <option value="foarte rar">Foarte rar</option>
+                <option value="rar">Rar</option>
+                <option value="adesea">Adesea</option>
+                <option value="des">Des</option>
+                <option value="foarte des">Foarte des</option>
             </select>
         </div>
         <div class="mb-3">
-            <label for="age" class="form-label">Varsta</label>
-            <input type="number" id="age" class="form-control" placeholder="Introdu varsta" required>
+            <label for="age" class="form-label">Vârstă</label>
+            <input type="number" id="age" class="form-control" placeholder="Introdu vârsta" required>
         </div>
-        <button type="submit" class="btn btn-primary w-100">Genereaza program de antrenament</button>
+        <div class="mb-3">
+            <label for="gender" class="form-label">Gen</label>
+            <select id="gender" class="form-select" required>
+                <option value="">Alege genul...</option>
+                <option value="masculin">Masculin</option>
+                <option value="feminin">Feminin</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="last-practiced" class="form-label">Când ai practicat ultima dată acest sport?</label>
+            <select id="last-practiced" class="form-select" required>
+                <option value="">Selectează o opțiune...</option>
+                <option value="acum cateva zile">Acum câteva zile</option>
+                <option value="saptamana trecuta">Săptămâna trecută</option>
+                <option value="luna trecuta">Luna trecută</option>
+                <option value="2-3 luni in urma">2-3 luni în urmă</option>
+                <option value="4-6 luni in urma">4-6 luni în urmă</option>
+                <option value="7-9 luni in urma">7-9 luni în urmă</option>
+                <option value="10-12 luni in urma">10-12 luni în urmă</option>
+                <option value="peste 1 an">Peste 1 an</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="weight" class="form-label">Greutatea (kg)</label>
+            <input type="number" id="weight" class="form-control" placeholder="Introdu greutatea" required>
+        </div>
+        <div class="mb-3">
+            <label for="height" class="form-label">Înălțimea (cm)</label>
+            <input type="number" id="height" class="form-control" placeholder="Introdu înălțimea" required>
+        </div>
+        <div class="mb-3">
+            <label for="physical-level" class="form-label">Nivel fizic</label>
+            <select id="physical-level" class="form-select" required>
+                <option value="">Selectează nivelul fizic...</option>
+                <option value="scazut">Scăzut</option>
+                <option value="mediu">Mediu</option>
+                <option value="bun">Bun</option>
+                <option value="foarte bun">Foarte bun</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="training-hours" class="form-label">Câte ore pe săptămână ești dispus să te antrenezi?</label>
+            <select id="training-hours" class="form-select" required>
+                <option value="">Alege o opțiune...</option>
+                <option value="mai putin de 5 ore">Mai putin de 5 ore</option>
+                <option value="5-10 ore">5-10 ore</option>
+                <option value="10-15 ore">10-15 ore</option>
+                <option value="mai mult de 15 ore">Mai mult de 15 de ore</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="objectives" class="form-label">Care este obiectivul tău principal?</label>
+            <select id="objectives" class="form-select" required>
+                <option value="">Alege o opțiune...</option>
+                <option value="imbunatatirea tehnicii">Îmbunătățirea tehnicii</option>
+                <option value="imbunatatirea rezistentei">Îmbunătățirea rezistenței</option>
+                <option value="cresterea vitezei">Creșterea vitezei</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="training-style" class="form-label">Ce stil de antrenament preferi?</label>
+            <select id="training-style" class="form-select" required>
+                <option value="">Alege o opțiune...</option>
+                <option value="individual">Individual</option>
+                <option value="in echipa">În echipă</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="sleep-quality" class="form-label">Calitatea somnului</label>
+            <select id="sleep-quality" class="form-select" required>
+                <option value="">Alege o opțiune...</option>
+                <option value="slaba">Slabă</option>
+                <option value="medie">Medie</option>
+                <option value="buna">Bună</option>
+                <option value="foarte buna">Foarte bună</option>
+            </select>
+        </div>
+        <div class="mb-3" id="football-positions-container" style="display: none;">
+            <label for="football-positions" class="form-label">Poziție preferată (Fotbal)</label>
+            <select id="football-positions" class="form-select">
+                <option value="">Alege o poziție...</option>
+                <option value="portar">Portar</option>
+                <option value="fundas central">Fundas central</option>
+                <option value="fundas lateral">Fundas lateral</option>
+                <option value="mijlocas defensiv">Mijlocas defensiv</option>
+                <option value="mijlocas central">Mijlocas central</option>
+                <option value="mijlocas ofensiv">Mijlocas ofensiv</option>
+                <option value="mijlocas de banda">Mijlocas de banda</option>
+                <option value="atacant central">Atacant central</option>
+                <option value="atacant lateral">Atacant lateral</option>
+                <option value="varf">Varf</option>
+            </select>
+        </div>
+        <div class="mb-3" id="basketball-positions-container" style="display: none;">
+            <label for="basketball-positions" class="form-label">Poziție preferată (Baschet)</label>
+            <select id="basketball-positions" class="form-select">
+                <option value="">Alege o poziție...</option>
+                <option value="fundas coordonator">Fundas coordonator</option>
+                <option value="fundas lateral">Fundas lateral</option>
+                <option value="extrema mica">Extrema mica</option>
+                <option value="extrema mare">Extrema mare</option>
+                <option value="pivot">Pivot</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <p>Alege zilele în care ești disponibil pentru antrenament</p>
+            <div id="availability" class="d-flex flex-wrap gap-2">
+                <div>
+                    <input type="checkbox" id="luni" name="availability" value="luni">
+                    <label for="luni">Luni</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="marti" name="availability" value="marti">
+                    <label for="marti">Marți</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="miercuri" name="availability" value="miercuri">
+                    <label for="miercuri">Miercuri</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="joi" name="availability" value="joi">
+                    <label for="joi">Joi</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="vineri" name="availability" value="vineri">
+                    <label for="vineri">Vineri</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="sambata" name="availability" value="sambata">
+                    <label for="sambata">Sâmbătă</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="duminica" name="availability" value="duminica">
+                    <label for="duminica">Duminică</label>
+                </div>
+            </div>
+            <div id="availability-error" class="text-danger mt-2" style="display: none;">
+                Selectați cel puțin o zi!
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Generează program de antrenament</button>
     </form>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="../scripts/virtual-assistant-script.js"></script>
+
 </body>
 </html>

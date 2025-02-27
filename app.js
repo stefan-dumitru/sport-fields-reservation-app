@@ -495,16 +495,60 @@ app.get("/get-coordinates", async (req, res) => {
     }
 });
 
+function extractExerciseName(text) {
+    let match = text.match(/(?:Exercitiu \d+ - |\* )?([^:-]+)/);
+    return match ? match[1].trim() : null;
+}
+
+async function fetchYouTubeVideo(exerciseName, sportName) {
+    try {
+        const response = await axios.get("https://www.googleapis.com/youtube/v3/search", {
+            params: {
+                part: "snippet",
+                q: `${exerciseName} pentru ${sportName}`,
+                type: "video",
+                maxResults: 1,
+                key: process.env.YOUTUBE_API_KEY,
+                order: "relevance",
+                publishedAfter: "2020-01-01T00:00:00Z"
+            }
+        });
+
+        if (response.data.items.length > 0) {
+            return `https://www.youtube.com/watch?v=${response.data.items[0].id.videoId}`;
+        } else {
+            return null;
+        }
+    } catch (error) {
+        console.error("Error fetching YouTube video:", error.message);
+        return null;
+    }
+}
+
 app.get('/get-training-plan', async (req, res) => {
-    const { sport, experience, age } = req.query;
+    const {
+        sport,
+        experience,
+        age,
+        gender,
+        lastPracticed,
+        weight,
+        height,
+        physicalLevel,
+        trainingHours,
+        objectives,
+        trainingStyle,
+        sleepQuality,
+        preferredPosition,
+        availabilityDays
+    } = req.query;
 
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
 
-
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 25000);
+    const timeout = setTimeout(() => controller.abort(), 50000);
 
     req.on('close', () => {
         clearTimeout(timeout);
@@ -519,24 +563,40 @@ app.get('/get-training-plan', async (req, res) => {
                 messages: [
                     {
                         role: "system",
-                        content: "You are a professional trainer creating weekly training schedules."
+                        content: "You are a professional trainer creating personalized weekly training schedules."
                     },
                     {
                         role: "user",
-                        content: `Creeaza un program de antrenament saptamanal pentru un jucator de ${sport}, avand nivelul de experienta ${experience} si cu varsta de ${age} ani. 
+                        content: `Creeaza un program de antrenament saptamanal personalizat. Detaliile sportivului sunt:
+- Sport: ${sport}
+- Cat de des practica acest sport: ${experience}
+- Varsta: ${age}
+- Gen: ${gender}
+- Ultima data cand a practicat sportul: ${lastPracticed}
+- Greutate: ${weight} kg
+- Inaltime: ${height} cm
+- Nivel de pregatire fizica: ${physicalLevel}
+- Ore alocate pentru antrenament pe saptamana: ${trainingHours}
+- Obiectivul principal al sportivului: ${objectives}
+- Stilul de antrenament: ${trainingStyle}
+- Calitatea somnului: ${sleepQuality}
+- Pozitia pe care prefera sa joace: ${preferredPosition}
+- Zile disponibile pentru antrenamente: ${availabilityDays}
+
 Formateaza raspunsul astfel:
 1. Luni
-  - Exercitiu 1
-  - Exercitiu 2
+  - Exercitii de incalzire (durata totala)
+      * exercitiul 1 (durata + explicare detaliata : in ce consta exercitiul, cum se realizeaza).
+      * exercitiul 2 (durata + explicare detaliata : in ce consta exercitiul, cum se realizeaza).
+      * ...
+  - Exercitiu 1 (durata + explicare detaliata : in ce consta exercitiul, cum se realizeaza).
+  - Exercitiu 2 (durata + explicare detaliata : in ce consta exercitiul, cum se realizeaza).
+  - ...
 
-2. Marti
-  - Exercitiu 1
-  - Exercitiu 2
-
-(Continua asa pentru restul saptamanii. Raspunsul trebuie sa nu contina diacritice si sa inceapa cu o propozitie scurta)`
+(Continua asa pentru restul zilelor selectate de sportiv. Raspunsul trebuie sa nu aiba diacritice si sa inceapa cu o propozitie scurta. Nu adauga nicio propozitie la final, cand termini de facut programul.)`
                     }
                 ],
-                max_tokens: 500,
+                max_tokens: 800,
             },
             {
                 headers: {
@@ -549,18 +609,42 @@ Formateaza raspunsul astfel:
         clearTimeout(timeout);
 
         const rawTrainingPlan = response.data.choices[0].message.content;
+        console.log(rawTrainingPlan);
 
         const days = rawTrainingPlan.split(/\n(?=\d+\.\s?[A-Z][a-z]+)/).slice(1);
         const trainingPlan = {};
 
-        days.forEach(daySection => {
+        for (const daySection of days) {
             const [dayLine, ...exerciseLines] = daySection.trim().split('\n');
             const dayName = dayLine.replace(/^\d+\.\s?/, '').trim();
-            const exercises = exerciseLines
-                .map(line => line.replace(/^\s*-\s*/, '').trim())
-                .filter(line => line.length > 0);
+
+            const exercises = [];
+            for (const line of exerciseLines) {
+                let formattedLine = line.replace(/^\s*-\s*/, '').trim();
+
+                const exerciseName = formattedLine.split('(')[0].trim();
+                const extractedName = extractExerciseName(exerciseName);
+                console.log(extractedName);
+
+                if (!extractedName) {
+                    console.log("Skipping empty or invalid line.");
+                    continue;
+                }
+
+                const videoLink = await fetchYouTubeVideo(extractedName, sport);
+                console.log("Link video : ", videoLink);
+
+                if (videoLink) {
+                    formattedLine += ` <a href="${videoLink}" target="_blank">[Video]</a>`;
+                }
+
+                console.log("Linie formatata : ", formattedLine);
+                exercises.push(formattedLine);
+            }
+
             trainingPlan[dayName] = exercises;
-        });
+            console.log("Training plan : ", trainingPlan);
+        }
 
         res.write(`data: ${JSON.stringify({ success: true, trainingPlan })}\n\n`);
         res.end();

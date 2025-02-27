@@ -1,8 +1,43 @@
 const form = document.getElementById('training-form');
 const chatbox = document.getElementById('chatbox');
 
+const availabilityError = document.getElementById('availability-error');
+
+const sportSelect = document.getElementById('sport');
+const footballPositionsContainer = document.getElementById('football-positions-container');
+const basketballPositionsContainer = document.getElementById('basketball-positions-container');
+const footballPositionsSelect = document.getElementById('football-positions');
+const basketballPositionsSelect = document.getElementById('basketball-positions');
+
+sportSelect.addEventListener('change', () => {
+    const selectedSport = sportSelect.value;
+
+    footballPositionsContainer.style.display = 'none';
+    basketballPositionsContainer.style.display = 'none';
+    footballPositionsSelect.required = false;
+    basketballPositionsSelect.required = false;
+
+    if (selectedSport === 'fotbal') {
+        footballPositionsContainer.style.display = 'block';
+        footballPositionsSelect.required = true;
+    } else if (selectedSport === 'baschet') {
+        basketballPositionsContainer.style.display = 'block';
+        basketballPositionsSelect.required = true;
+    }
+});
+
 form.addEventListener('submit', (e) => {
     e.preventDefault();
+
+    const checkboxes = document.querySelectorAll('input[name="availability"]:checked');
+    
+    if (checkboxes.length === 0) {
+        availabilityError.style.display = 'block';
+        chatbox.scrollTop = chatbox.scrollHeight;
+        return;
+    } else {
+        availabilityError.style.display = 'none';
+    }
 
     if (!navigator.onLine) {
         const errorMessage = document.createElement('div');
@@ -15,7 +50,41 @@ form.addEventListener('submit', (e) => {
     const sport = document.getElementById('sport').value;
     const experience = document.getElementById('experience').value;
     const age = document.getElementById('age').value;
+    const gender = document.getElementById('gender').value;
+    const lastPracticed = document.getElementById('last-practiced').value;
+    const weight = document.getElementById('weight').value;
+    const height = document.getElementById('height').value;
+    const physicalLevel = document.getElementById('physical-level').value;
+    const trainingHours = document.getElementById('training-hours').value;
+    const objectives = document.getElementById('objectives').value;
+    const trainingStyle = document.getElementById('training-style').value;
+    const sleepQuality = document.getElementById('sleep-quality').value;
+    if (footballPositionsContainer.style.display === 'block')
+        var preferredPosition = document.getElementById('football-positions').value;
+    else var preferredPosition = document.getElementById('basketball-positions').value;
+    const availabilityDays = Array.from(
+        document.querySelectorAll('input[name="availability"]:checked')
+    ).map((checkbox) => checkbox.value);
 
+    const userInfo = {
+        sport,
+        experience,
+        age,
+        gender,
+        lastPracticed,
+        weight,
+        height,
+        physicalLevel,
+        trainingHours,
+        objectives,
+        trainingStyle,
+        sleepQuality,
+        preferredPosition,
+        availabilityDays,
+    };
+
+    console.log(userInfo.preferredPosition);
+    
     const userMessage = document.createElement('div');
     userMessage.className = 'user-message';
     userMessage.textContent = `Sport: ${sport}, Nivel de experienta: ${experience}, Varsta: ${age}`;
@@ -30,7 +99,9 @@ form.addEventListener('submit', (e) => {
     typingAnimation.style.display = "flex";
     chatbox.appendChild(typingAnimation);
 
-    const eventSource = new EventSource(`http://localhost:3000/get-training-plan?sport=${sport}&experience=${experience}&age=${age}`);
+    const params = new URLSearchParams(userInfo).toString();
+    console.log(params);
+    const eventSource = new EventSource(`http://localhost:3000/get-training-plan?${params}`);
 
     eventSource.onmessage = (event) => {
         const data = JSON.parse(event.data);
