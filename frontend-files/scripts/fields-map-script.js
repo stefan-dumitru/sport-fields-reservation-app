@@ -54,7 +54,6 @@ function populateFieldSelector(fields) {
 
     selector.addEventListener("change", (event) => {
         const selectedFieldId = event.target.value;
-        console.log("acesta e ID-ul terenului selectat : ", selectedFieldId);
         handleFieldSelection(selectedFieldId);
     });
 }
@@ -66,7 +65,6 @@ function handleFieldSelection(fieldId) {
     
     if (fieldId) {
         const selectedMarker = allMarkers.find((marker) => String(marker.fieldId) === String(fieldId));
-        console.log("Selected Marker value : ", selectedMarker);
             
         if (selectedMarker) {
             selectedMarker.setVisible(true);

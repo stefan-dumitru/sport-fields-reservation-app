@@ -609,7 +609,6 @@ Formateaza raspunsul astfel:
         clearTimeout(timeout);
 
         const rawTrainingPlan = response.data.choices[0].message.content;
-        console.log(rawTrainingPlan);
 
         const days = rawTrainingPlan.split(/\n(?=\d+\.\s?[A-Z][a-z]+)/).slice(1);
         const trainingPlan = {};
@@ -624,7 +623,6 @@ Formateaza raspunsul astfel:
 
                 const exerciseName = formattedLine.split('(')[0].trim();
                 const extractedName = extractExerciseName(exerciseName);
-                console.log(extractedName);
 
                 if (!extractedName) {
                     console.log("Skipping empty or invalid line.");
@@ -632,18 +630,15 @@ Formateaza raspunsul astfel:
                 }
 
                 const videoLink = await fetchYouTubeVideo(extractedName, sport);
-                console.log("Link video : ", videoLink);
 
                 if (videoLink) {
                     formattedLine += ` <a href="${videoLink}" target="_blank">[Video]</a>`;
                 }
 
-                console.log("Linie formatata : ", formattedLine);
                 exercises.push(formattedLine);
             }
 
             trainingPlan[dayName] = exercises;
-            console.log("Training plan : ", trainingPlan);
         }
 
         res.write(`data: ${JSON.stringify({ success: true, trainingPlan })}\n\n`);

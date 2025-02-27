@@ -82,8 +82,6 @@ form.addEventListener('submit', (e) => {
         preferredPosition,
         availabilityDays,
     };
-
-    console.log(userInfo.preferredPosition);
     
     const userMessage = document.createElement('div');
     userMessage.className = 'user-message';
@@ -100,7 +98,6 @@ form.addEventListener('submit', (e) => {
     chatbox.appendChild(typingAnimation);
 
     const params = new URLSearchParams(userInfo).toString();
-    console.log(params);
     const eventSource = new EventSource(`http://localhost:3000/get-training-plan?${params}`);
 
     eventSource.onmessage = (event) => {
