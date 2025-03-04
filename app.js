@@ -457,7 +457,7 @@ app.get('/get-field-reservations/:id_teren', async (req, res) => {
 });
 
 app.get("/get-sports-fields", (_req, res) => {
-    const query = "SELECT id_teren, denumire_teren, adresa FROM terenuri_sportive";
+    const query = `SELECT id_teren, denumire_teren, adresa FROM terenuri_sportive WHERE statut = 'confirmat'`;
 
     db.query(query, (err, results) => {
         if (err) {
