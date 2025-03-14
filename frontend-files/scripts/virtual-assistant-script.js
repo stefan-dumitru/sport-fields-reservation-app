@@ -57,8 +57,8 @@ form.addEventListener('submit', (e) => {
     const physicalLevel = document.getElementById('physical-level').value;
     const trainingHours = document.getElementById('training-hours').value;
     const objectives = document.getElementById('objectives').value;
-    const trainingStyle = document.getElementById('training-style').value;
-    const sleepQuality = document.getElementById('sleep-quality').value;
+    // const trainingStyle = document.getElementById('training-style').value;
+    // const sleepQuality = document.getElementById('sleep-quality').value;
     if (footballPositionsContainer.style.display === 'block')
         var preferredPosition = document.getElementById('football-positions').value;
     else var preferredPosition = document.getElementById('basketball-positions').value;
@@ -77,8 +77,8 @@ form.addEventListener('submit', (e) => {
         physicalLevel,
         trainingHours,
         objectives,
-        trainingStyle,
-        sleepQuality,
+        // trainingStyle,
+        // sleepQuality,
         preferredPosition,
         availabilityDays,
     };

@@ -457,7 +457,7 @@ app.get('/get-field-reservations/:id_teren', async (req, res) => {
 });
 
 app.get("/get-sports-fields", (_req, res) => {
-    const query = `SELECT id_teren, denumire_teren, adresa FROM terenuri_sportive WHERE statut = 'confirmat'`;
+    const query = `SELECT id_teren, denumire_teren, adresa, program FROM terenuri_sportive WHERE statut = 'confirmat'`;
 
     db.query(query, (err, results) => {
         if (err) {
@@ -502,10 +502,16 @@ function extractExerciseName(text) {
 
 async function fetchYouTubeVideo(exerciseName, sportName) {
     try {
+        // const searchQuery = `${exerciseName} tutorial de antrenament pentru ${sportName}`;
+
+        const searchQuery = `Tutorial ${exerciseName} pentru ${sportName} cum se face`;
+        // const searchQuery = `Tutorial ${exerciseName} ${sportName} cum se face`;
+        console.log(searchQuery);
+
         const response = await axios.get("https://www.googleapis.com/youtube/v3/search", {
             params: {
                 part: "snippet",
-                q: `${exerciseName} pentru ${sportName}`,
+                q: searchQuery,
                 type: "video",
                 maxResults: 1,
                 key: process.env.YOUTUBE_API_KEY,
@@ -537,8 +543,8 @@ app.get('/get-training-plan', async (req, res) => {
         physicalLevel,
         trainingHours,
         objectives,
-        trainingStyle,
-        sleepQuality,
+        // trainingStyle,
+        // sleepQuality,
         preferredPosition,
         availabilityDays
     } = req.query;
@@ -578,8 +584,6 @@ app.get('/get-training-plan', async (req, res) => {
 - Nivel de pregatire fizica: ${physicalLevel}
 - Ore alocate pentru antrenament pe saptamana: ${trainingHours}
 - Obiectivul principal al sportivului: ${objectives}
-- Stilul de antrenament: ${trainingStyle}
-- Calitatea somnului: ${sleepQuality}
 - Pozitia pe care prefera sa joace: ${preferredPosition}
 - Zile disponibile pentru antrenamente: ${availabilityDays}
 
@@ -593,7 +597,7 @@ Formateaza raspunsul astfel:
   - Exercitiu 2 (durata + explicare detaliata : in ce consta exercitiul, cum se realizeaza).
   - ...
 
-(Continua asa pentru restul zilelor selectate de sportiv. Raspunsul trebuie sa nu aiba diacritice si sa inceapa cu o propozitie scurta. Nu adauga nicio propozitie la final, cand termini de facut programul.)`
+(Continua asa pentru restul zilelor selectate de sportiv. Raspunsul trebuie sa nu aiba diacritice si sa inceapa cu o propozitie scurta. Exercitiile trebuie sa fie cat mai simple, pe intelesul oricui, adica sa fie cat mai banale.)`
                     }
                 ],
                 max_tokens: 800,
