@@ -5,6 +5,8 @@ const axios = require('axios');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
+// const { Translate } = require("@google-cloud/translate").v2;
+
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 // const bcrypt = require('bcrypt');
@@ -495,36 +497,93 @@ app.get("/get-coordinates", async (req, res) => {
     }
 });
 
+async function translateText(text, targetLanguage = "en") {
+    const exerciseDictionary = {
+        "incalzire": "warming-up",
+        "sut": "shooting",
+        "genuflexiuni": "squats",
+        "flotari": "push-ups",
+        "abdomen": "core exercises",
+        "alergare": "running",
+        "sarituri": "jumping",
+        "jonglerii": "juggling",
+        "pasare": "passing",
+        "pase": "passing",
+        "dribbling": "dribbling"
+    };
+
+    const normalizedText = text.trim().toLowerCase();
+
+    if (exerciseDictionary[normalizedText]) {
+        return exerciseDictionary[normalizedText];
+    }
+
+    try {
+        const response = await axios.get(
+            `https://translation.googleapis.com/language/translate/v2`,
+            {
+                params: {
+                    q: text,
+                    target: targetLanguage,
+                    key: process.env.GOOGLE_TRANSLATE_API_KEY
+                }
+            }
+        );
+        return response.data.data.translations[0].translatedText;
+    } catch (error) {
+        console.error("Translation error:", error);
+        return text;
+    }
+}
+
 function extractExerciseName(text) {
     let match = text.match(/(?:Exercitiu \d+ - |\* )?([^:-]+)/);
     return match ? match[1].trim() : null;
 }
 
 async function fetchYouTubeVideo(exerciseName, sportName) {
+    const translatedExercise = await translateText(exerciseName, "en");
+    const translatedSport = await translateText(sportName, "en");
+
+    console.log("Exeritiu tradus : ", translatedExercise);
+    console.log("Sport tradus : ", translatedSport);
+
     try {
-        // const searchQuery = `${exerciseName} tutorial de antrenament pentru ${sportName}`;
+        const sportChannels = {
+            fotbal: ["UC5SQGzkWyQSW_fe-URgq7xw", "UC0Ik25PHaiHCbfGrzu-lBFQ", "UC4bvZoXoM-9_ITecvZ2U0BQ"], // AllAttack, Unisport, Improved Football
+            baschet: ["UCqjq2Zq6QUwpDR45Ns89YDw", "UC3jwvC1HTXpdvrlHFMFTdYg"], // ShotMechanics, Pro Training Basketball
+            tenis: ["UCvQvcthQRTWwkkRgTGrtpsg", "UCTK9oKMGU0XIQpLJYDs45fw"] // TennisUnleashed, Feel Tennis Instruction
+        };
 
-        const searchQuery = `Tutorial ${exerciseName} pentru ${sportName} cum se face`;
-        // const searchQuery = `Tutorial ${exerciseName} ${sportName} cum se face`;
-        console.log(searchQuery);
-
-        const response = await axios.get("https://www.googleapis.com/youtube/v3/search", {
-            params: {
-                part: "snippet",
-                q: searchQuery,
-                type: "video",
-                maxResults: 1,
-                key: process.env.YOUTUBE_API_KEY,
-                order: "relevance",
-                publishedAfter: "2020-01-01T00:00:00Z"
-            }
-        });
-
-        if (response.data.items.length > 0) {
-            return `https://www.youtube.com/watch?v=${response.data.items[0].id.videoId}`;
-        } else {
+        const channels = sportChannels[sportName.toLowerCase()];
+        if (!channels) {
+            console.error("Invalid sport name provided:", sportName);
             return null;
         }
+
+        const searchQuery = `Tutorial ${translatedExercise} for ${translatedSport}`;
+
+        for (const channelId of channels) {
+            const response = await axios.get("https://www.googleapis.com/youtube/v3/search", {
+                params: {
+                    part: "snippet",
+                    q: searchQuery,
+                    type: "video",
+                    maxResults: 1,
+                    key: process.env.YOUTUBE_API_KEY,
+                    order: "relevance",
+                    publishedAfter: "2020-01-01T00:00:00Z",
+                    channelId: channelId
+                }
+            });
+
+            if (response.data.items.length > 0) {
+                console.log("Raspuns : ", `https://www.youtube.com/watch?v=${response.data.items[0].id.videoId}`);
+                return `https://www.youtube.com/watch?v=${response.data.items[0].id.videoId}`;
+            }
+        }
+
+        return null;
     } catch (error) {
         console.error("Error fetching YouTube video:", error.message);
         return null;
@@ -543,8 +602,6 @@ app.get('/get-training-plan', async (req, res) => {
         physicalLevel,
         trainingHours,
         objectives,
-        // trainingStyle,
-        // sleepQuality,
         preferredPosition,
         availabilityDays
     } = req.query;
@@ -593,14 +650,14 @@ Formateaza raspunsul astfel:
       * exercitiul 1 (durata + explicare detaliata : in ce consta exercitiul, cum se realizeaza).
       * exercitiul 2 (durata + explicare detaliata : in ce consta exercitiul, cum se realizeaza).
       * ...
-  - Exercitiu 1 (durata + explicare detaliata : in ce consta exercitiul, cum se realizeaza).
-  - Exercitiu 2 (durata + explicare detaliata : in ce consta exercitiul, cum se realizeaza).
+  - Exercitiu 1 - denumire (durata + explicare detaliata : in ce consta exercitiul, cum se realizeaza).
+  - Exercitiu 2 - denumire (durata + explicare detaliata : in ce consta exercitiul, cum se realizeaza).
   - ...
 
-(Continua asa pentru restul zilelor selectate de sportiv. Raspunsul trebuie sa nu aiba diacritice si sa inceapa cu o propozitie scurta. Exercitiile trebuie sa fie cat mai simple, pe intelesul oricui, adica sa fie cat mai banale.)`
+(Continua asa pentru restul zilelor selectate de sportiv. Raspunsul trebuie sa nu aiba diacritice si sa inceapa cu o propozitie scurta. Exercitiile trebuie sa fie cat mai simple.)`
                     }
                 ],
-                max_tokens: 800,
+                max_tokens: 700,
             },
             {
                 headers: {
