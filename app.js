@@ -497,6 +497,34 @@ app.get("/get-coordinates", async (req, res) => {
     }
 });
 
+app.get("/get-user-reservations", async (req, res) => {
+    const { username, date } = req.query;
+
+    const query = `SELECT * FROM REZERVARI WHERE username_sportiv = ? AND data_rezervare = ?`;
+    db.query(query, [username, date], (err, result) => {
+        if (err) {
+            console.error('Error getting user reservations:', err);
+            return res.status(500).json({ success: false, message: 'Error canceling reservation.' });
+        }
+        
+        res.json({ success: true, result });
+    });
+});
+
+app.get("/get-user-reservations-for-field", async (req, res) => {
+    const { username, date, fieldId } = req.query;
+
+    const query = `SELECT * FROM REZERVARI WHERE username_sportiv = ? AND data_rezervare = ? AND id_teren = ?`;
+    db.query(query, [username, date, fieldId], (err, result) => {
+        if (err) {
+            console.error('Error getting user reservations:', err);
+            return res.status(500).json({ success: false, message: 'Error canceling reservation.' });
+        }
+        
+        res.json({ success: true, result });
+    });
+});
+
 async function translateText(text, targetLanguage = "en") {
     const exerciseDictionary = {
         "incalzire": "warming-up",

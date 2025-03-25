@@ -212,6 +212,14 @@ function addDragSelectionListeners(selectedDate) {
                 }
 
                 if (cell.style.backgroundColor === "green" && !selectedCells.includes(cell)) {
+                    if (selectedCells.length >= 3) { 
+                        isDragging = false;
+                        alert("You cannot make a reservation longer than 3 hours.");
+                        selectedCells.forEach(c => c.style.backgroundColor = "green");
+                        selectedCells = [];
+                        return;
+                    }
+                    
                     selectedCells.push(cell);
                     cell.style.backgroundColor = "yellow";
                 }
@@ -232,13 +240,45 @@ function addDragSelectionListeners(selectedDate) {
                 const endCell = selectedCells[selectedCells.length - 1];
                 const startHour = startCell.startHour;
                 const endHour = endCell.dataset.hour;
+                const username = localStorage.getItem("username");
+                const currentFieldId = cell.getAttribute("data-field-id");
+
+                try {
+                    const response = await fetch(`http://localhost:3000/get-user-reservations?username=${username}&date=${selectedDate}`);
+                    const userReservations = await response.json();
+        
+                    if (userReservations.result.length >= 3) {
+                        alert("You have reached the maximum of 3 reservations for this day.");
+                        selectedCells.forEach((c) => (c.style.backgroundColor = "green"));
+                        selectedCells = [];
+                        return;
+                    }
+                } catch (error) {
+                    console.error("Error fetching user reservations:", error);
+                    alert("An error occurred while checking your reservations.");
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`http://localhost:3000/get-user-reservations-for-field?username=${username}&date=${selectedDate}&fieldId=${currentFieldId}`);
+                    const fieldReservations = await response.json();
+                                
+                    if (fieldReservations.result.length >= 1) {
+                        alert("You can only make one reservation per field per day.");
+                        selectedCells.forEach((c) => (c.style.backgroundColor = "green"));
+                        selectedCells = [];
+                        return;
+                    }
+                } catch (error) {
+                    console.error("Error fetching user field reservations:", error);
+                    alert("An error occurred while checking your reservations.");
+                }
 
                 const confirmReservation = confirm(
                     `Do you want to reserve from ${startHour}:00 to ${parseInt(endHour) + 1}:00?`
                 );
 
                 if (confirmReservation) {
-                    const username = localStorage.getItem("username");
                     const reservationDetails = {
                         id_teren: startCell.fieldId,
                         data_rezervare: selectedDate,
