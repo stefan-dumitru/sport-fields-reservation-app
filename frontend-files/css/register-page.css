@@ -1,0 +1,28 @@
+.requirement {
+    color: gray;
+}
+.requirement.met {
+    color: green;
+}
+#alert-message-invalid-email {
+    display: none;
+}
+#alert-message-different-passwords {
+    display: none;
+}
+#alert-message-password-complexity {
+    display: none;
+}
+#alert-message-duplicate-email {
+    display: none;
+}
+.password-container {
+    position: relative;
+}
+.toggle-password {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
