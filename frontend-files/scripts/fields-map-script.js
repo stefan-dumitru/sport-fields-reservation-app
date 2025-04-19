@@ -4,6 +4,15 @@ let userMarker;
 let userLocation;
 let reservationPopup;
 
+document.addEventListener("DOMContentLoaded", function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get("payment") === "success") {
+        alert("Payment successful! Your reservation has been confirmed.");
+    } else if (urlParams.get("payment") === "cancel") {
+        alert("Payment canceled. You can still pay for the reservation by accessing the reservation history.");
+    }
+});
+
 function addHours(date, hours) {
     const newDate = new Date(date);
     newDate.setHours(newDate.getHours() + hours);
@@ -42,6 +51,7 @@ function initMap() {
                         marker.fieldId = field.id_teren;
                         marker.address = address;
                         marker.schedule = field.program;
+                        marker.pricePerHour = field.pret_ora;
 
                         allMarkers.push(marker);
 
@@ -158,6 +168,7 @@ function showReservationPopup(fieldId) {
             <button onclick="closeReservationPopup()" style="background: red; color: white; border: none; padding: 5px; cursor: pointer;">&times;</button>
         </div>
         <p>Adresa: ${field.address}</p>
+        <p>Pret: ${field.pricePerHour} lei/ora</p>
         <label for='reservation-date'>Selecteaza data:</label>
         <input type='date' id='reservation-date'><br>
         <button onclick='fetchReservations(${field.fieldId})'>Verifica disponibilitatea</button>
@@ -179,12 +190,12 @@ let isDragging = false;
 let startCell = null;
 let selectedCells = [];
 
-function addDragSelectionListeners(selectedDate) {
+function addDragSelectionListeners(selectedDate, fieldPricePerHour) {
     const cells = document.querySelectorAll(".availability-cell");
     const table = document.querySelector("#availability-popup table");
 
     table.addEventListener("mousedown", function (event) {
-        event.preventDefault(); // Prevents text selection while dragging
+        event.preventDefault();
     });
 
     cells.forEach(cell => {
@@ -274,6 +285,9 @@ function addDragSelectionListeners(selectedDate) {
                     alert("An error occurred while checking your reservations.");
                 }
 
+                const totalHours = selectedCells.length;
+                const totalPrice = fieldPricePerHour * totalHours;
+
                 const confirmReservation = confirm(
                     `Do you want to reserve from ${startHour}:00 to ${parseInt(endHour) + 1}:00?`
                 );
@@ -297,8 +311,36 @@ function addDragSelectionListeners(selectedDate) {
                         const result = await response.json();
                         if (result.success) {
                             alert("Reservation made successfully!");
+
+                            try {
+                                const paymentResponse = await fetch("http://localhost:3000/create-checkout-session", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({
+                                        id_teren: currentFieldId,
+                                        data_rezervare: selectedDate,
+                                        ora_inceput: `${startHour}:00`,
+                                        ora_sfarsit: `${parseInt(endHour) + 1}:00`,
+                                        username,
+                                        totalPrice
+                                    }),
+                                });
+        
+                                const paymentData = await paymentResponse.json();
+        
+                                if (paymentData.url) {
+                                    window.location.href = paymentData.url;
+                                } else {
+                                    alert("Error processing payment. Please try again.");
+                                    selectedCells.forEach(c => c.style.backgroundColor = "green");
+                                }
+                            } catch (error) {
+                                console.error("Error processing payment:", error);
+                                alert("An error occurred while processing the payment.");
+                                selectedCells.forEach(c => c.style.backgroundColor = "green");
+                            }
+
                             selectedCells.forEach(c => c.style.backgroundColor = "red");
-                            location.reload();
                         } else {
                             alert(result.message || "Failed to make reservation.");
                             selectedCells.forEach(c => c.style.backgroundColor = "green");
@@ -319,7 +361,7 @@ function addDragSelectionListeners(selectedDate) {
     });
 }
 
-function displayAvailability(reservations, selectedDate, fieldSchedule, fieldId) {
+function displayAvailability(reservations, selectedDate, fieldSchedule, fieldId, fieldPricePerHour) {
     let openHour = 0, closeHour = 24;
 
     if (fieldSchedule !== "non-stop") {
@@ -352,7 +394,7 @@ function displayAvailability(reservations, selectedDate, fieldSchedule, fieldId)
     `;
 
     reservations.forEach(res => {
-        const formattedDate = addHours(new Date(res.data_rezervare), 2).toISOString().split('T')[0];
+        const formattedDate = addHours(new Date(res.data_rezervare), 3).toISOString().split('T')[0];
         const startTime = new Date(res.ora_inceput).toTimeString().split(' ')[0];
         const endTime = new Date(res.ora_sfarsit).toTimeString().split(' ')[0];
 
@@ -408,7 +450,7 @@ function displayAvailability(reservations, selectedDate, fieldSchedule, fieldId)
     availabilityPopup.style.transform = "translate(-50%, -50%)";
     availabilityPopup.style.display = "block";
 
-    addDragSelectionListeners(selectedDate);
+    addDragSelectionListeners(selectedDate, fieldPricePerHour);
 }
 
 function fetchReservations(id_teren) {
@@ -429,7 +471,7 @@ function fetchReservations(id_teren) {
         .then(data => {
             if (data.success) {
                 const reservations = data.reservations;
-                displayAvailability(reservations, selectedDate, field.schedule, field.fieldId);
+                displayAvailability(reservations, selectedDate, field.schedule, field.fieldId, field.pricePerHour);
             } else {
                 alert("Eroare la preluarea rezervarilor.");
             }

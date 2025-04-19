@@ -15,6 +15,9 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT;
 
+const Stripe = require('stripe');
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+
 app.use(cors());
 app.use(express.json());
 
@@ -88,7 +91,7 @@ app.post('/register', (req, res) => {
           res.json({ success: false, message: 'An error occurred. Please try again.' });
       } else {
           console.log('User registered:', result);
-          res.json({ success: true, message: 'Registration successful!' });
+          res.json({ success: true, message: 'Registration successful!', username });
       }
   });
 });
@@ -127,7 +130,7 @@ app.post('/reset-password', (req, res) => {
                 return res.json({ success: false, message: 'Failed to generate reset token.' });
             }
 
-            const resetLink = `http://localhost:3000/set-new-password?token=${resetToken}`;
+            const resetLink = `http://localhost:8080/set-new-password?token=${resetToken}`;
             const mailOptions = {
                 from: process.env.USER_EMAIL,
                 to: email,
@@ -177,10 +180,10 @@ app.put("/update-favourite-sports/:username", async (req, res) => {
   const query = 'UPDATE sportivi SET sporturi_preferate = ? WHERE username = ?';
   db.query(query, [sporturi_preferate, username], async (err, result) => {
     if (err) {
-      console.error('Error inserting user:', err);
+      console.error('Error updating favourite sports:', err);
       res.json({ success: false, message: 'An error occurred. Please try again.' });
     } else {
-      console.log('User registered:', result);
+      console.log('Favourite sports updated successfully:', result);
       res.json({ success: true, message: 'Favourite sports successfully changed!' });
     }
   });
@@ -459,7 +462,7 @@ app.get('/get-field-reservations/:id_teren', async (req, res) => {
 });
 
 app.get("/get-sports-fields", (_req, res) => {
-    const query = `SELECT id_teren, denumire_teren, adresa, program FROM terenuri_sportive WHERE statut = 'confirmat'`;
+    const query = `SELECT id_teren, denumire_teren, adresa, program, pret_ora FROM terenuri_sportive WHERE statut = 'confirmat'`;
 
     db.query(query, (err, results) => {
         if (err) {
@@ -744,12 +747,38 @@ Formateaza raspunsul astfel:
     }
 });
 
+app.post("/create-checkout-session", async (req, res) => {
+    try {
+        const { id_teren, data_rezervare, ora_inceput, ora_sfarsit, username, totalPrice } = req.body;
+
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ["card"],
+            line_items: [{
+                price_data: {
+                    currency: "ron",
+                    product_data: { name: `Field Reservation - ${id_teren}` },
+                    unit_amount: totalPrice * 100, // Convert to cents
+                },
+                quantity: 1,
+            }],
+            mode: "payment",
+            success_url: "http://127.0.0.1:8080/fields-map.html?payment=success",
+            cancel_url: "http://127.0.0.1:8080/fields-map.html?payment=cancel",
+        });
+
+        res.json({ url: session.url });
+    } catch (error) {
+        console.error("Error creating checkout session:", error);
+        res.status(500).json({ error: "Failed to create checkout session" });
+    }
+});
+
 app.get('/get-google-maps-key', (_req, res) => {
     res.json({ apiKey: process.env.GOOGLE_MAPS_API_KEY });
 });
 
 app.get('/set-new-password', (_req, res) => {
-    res.sendFile(path.join(__dirname, 'set-new-password.html'));
+    res.sendFile(path.join(__dirname, 'frontend-files', 'set-new-password.html'));
 });
 
 app.get('/login-page', (_req, res) => {
