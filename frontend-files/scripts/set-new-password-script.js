@@ -56,7 +56,8 @@ async function setNewPassword(event) {
             const data = await response.json();
             if (data.success) {
                 alert('Password updated successfully!');
-                window.location.href = 'http://localhost:3000/login-page';
+                // window.location.href = 'http://localhost:3000/login-page';
+                window.location.href = 'http://localhost:8080/login-page';
                 // window.location.href = 'log-in-page.html';
             } else {
                 alert('Invalid or expired token.');

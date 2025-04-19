@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const username = localStorage.getItem("username");
     if (!username) {
         alert("You must log in first!");
-        window.location.href = "login.html";
+        window.location.href = "log-in-page.html";
         return;
     }
 
@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
 
             data.reservations.forEach(reservation => {
-                const formattedDate = addHours(new Date(reservation.data_rezervare), 2).toISOString().split('T')[0];
+                const formattedDate = addHours(new Date(reservation.data_rezervare), 3).toISOString().split('T')[0];
                 const startTime = new Date(reservation.ora_inceput).toTimeString().split(' ')[0];
                 const endTime = new Date(reservation.ora_sfarsit).toTimeString().split(' ')[0];
 

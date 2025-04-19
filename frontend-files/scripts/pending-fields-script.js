@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const username = localStorage.getItem("username");
     if (!username) {
         alert("You must log in first!");
-        window.location.href = "login.html";
+        window.location.href = "log-in-page.html";
         return;
     }
 
@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             const tbody = document.getElementById("pending-fields-body");
 
             if (data.fields.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="text-center">Nu exista terenuri aflate in asteptare</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="9" class="text-center">Nu exista terenuri aflate in asteptare</td></tr>`;
                 return;
             }
 

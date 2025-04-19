@@ -78,6 +78,7 @@ async function register(event) {
 
             const data = await response.json();
             if (data.success) {
+                localStorage.setItem("username", data.username);
                 window.location.href = 'dashboard.html';
             }
             else {

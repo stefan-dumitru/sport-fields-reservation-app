@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const username = localStorage.getItem("username");
     if (!username) {
         alert("You must log in first!");
-        window.location.href = "login.html";
+        window.location.href = "log-in-page.html";
         return;
     }
 
