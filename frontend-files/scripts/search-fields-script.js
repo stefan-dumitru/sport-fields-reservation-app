@@ -2,6 +2,15 @@ let isDragging = false;
 let startCell = null;
 let selectedCells = [];
 
+document.addEventListener("DOMContentLoaded", function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get("payment") === "success") {
+        alert("Payment successful! Your reservation has been confirmed.");
+    } else if (urlParams.get("payment") === "cancel") {
+        alert("Payment canceled. You can still pay for the reservation by accessing the reservation history.");
+    }
+});
+
 function addHours(date, hours) {
     const newDate = new Date(date);
     newDate.setHours(newDate.getHours() + hours);
@@ -33,7 +42,7 @@ async function fetchFieldReservations(fieldId) {
         const data = await response.json();
 
         data.reservations.forEach(reservation => {
-            const formattedDate = addHours(new Date(reservation.data_rezervare), 2).toISOString().split('T')[0];
+            const formattedDate = addHours(new Date(reservation.data_rezervare), 3).toISOString().split('T')[0];
             const startTime = new Date(reservation.ora_inceput).toTimeString().split(' ')[0];
             const endTime = new Date(reservation.ora_sfarsit).toTimeString().split(' ')[0];
 
@@ -85,7 +94,6 @@ document.getElementById("search-form").addEventListener("submit", async (event) 
             fields.forEach((field) => {
                 const fieldHeader = document.createElement("th");
                 fieldHeader.textContent = `Field ${field.id_teren}`;
-                // fieldHeader.textContent = `${field.denumire_teren}`;
                 headerRow.appendChild(fieldHeader);
             });
 
@@ -221,13 +229,15 @@ document.getElementById("search-form").addEventListener("submit", async (event) 
                                 console.error("Error fetching user field reservations:", error);
                                 alert("An error occurred while checking your reservations.");
                             }
+
+                            const totalHours = selectedCells.length;
+                            const totalPrice = field.pret_ora * totalHours;
         
                             const confirmReservation = confirm(
                                 `Do you want to reserve from ${startHour}:00 to ${parseInt(endHour) + 1}:00?`
                             );
         
                             if (confirmReservation) {
-                                const username = localStorage.getItem("username");
                                 const reservationDetails = {
                                     id_teren: field.id_teren,
                                     data_rezervare: selectedDate,
@@ -249,10 +259,36 @@ document.getElementById("search-form").addEventListener("submit", async (event) 
                                     const result = await response.json();
                                     if (result.success) {
                                         alert("Reservation made successfully!");
-                                        selectedCells.forEach(
-                                            (c) => (c.style.backgroundColor = "red")
-                                        );
-                                        location.reload();
+
+                                        try {
+                                            const paymentResponse = await fetch("http://localhost:3000/create-checkout-session-new", {
+                                                method: "POST",
+                                                headers: { "Content-Type": "application/json" },
+                                                body: JSON.stringify({
+                                                    id_teren: currentFieldId,
+                                                    data_rezervare: selectedDate,
+                                                    ora_inceput: `${startHour}:00`,
+                                                    ora_sfarsit: `${parseInt(endHour) + 1}:00`,
+                                                    username,
+                                                    totalPrice
+                                                }),
+                                            });
+                    
+                                            const paymentData = await paymentResponse.json();
+                    
+                                            if (paymentData.url) {
+                                                window.location.href = paymentData.url;
+                                            } else {
+                                                alert("Error processing payment. Please try again.");
+                                                selectedCells.forEach(c => c.style.backgroundColor = "green");
+                                            }
+                                        } catch (error) {
+                                            console.error("Error processing payment:", error);
+                                            alert("An error occurred while processing the payment.");
+                                            selectedCells.forEach(c => c.style.backgroundColor = "green");
+                                        }
+            
+                                        selectedCells.forEach(c => c.style.backgroundColor = "red");
                                     } else {
                                         alert(result.message || "Failed to make reservation.");
                                         selectedCells.forEach(

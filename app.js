@@ -749,7 +749,7 @@ Formateaza raspunsul astfel:
 
 app.post("/create-checkout-session", async (req, res) => {
     try {
-        const { id_teren, data_rezervare, ora_inceput, ora_sfarsit, username, totalPrice } = req.body;
+        const { id_teren, totalPrice } = req.body;
 
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ["card"],
@@ -757,13 +757,39 @@ app.post("/create-checkout-session", async (req, res) => {
                 price_data: {
                     currency: "ron",
                     product_data: { name: `Field Reservation - ${id_teren}` },
-                    unit_amount: totalPrice * 100, // Convert to cents
+                    unit_amount: totalPrice * 100,
                 },
                 quantity: 1,
             }],
             mode: "payment",
             success_url: "http://127.0.0.1:8080/fields-map.html?payment=success",
             cancel_url: "http://127.0.0.1:8080/fields-map.html?payment=cancel",
+        });
+
+        res.json({ url: session.url });
+    } catch (error) {
+        console.error("Error creating checkout session:", error);
+        res.status(500).json({ error: "Failed to create checkout session" });
+    }
+});
+
+app.post("/create-checkout-session-new", async (req, res) => {
+    try {
+        const { id_teren, totalPrice } = req.body;
+
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ["card"],
+            line_items: [{
+                price_data: {
+                    currency: "ron",
+                    product_data: { name: `Field Reservation - ${id_teren}` },
+                    unit_amount: totalPrice * 100,
+                },
+                quantity: 1,
+            }],
+            mode: "payment",
+            success_url: "http://127.0.0.1:8080/search-fields.html?payment=success",
+            cancel_url: "http://127.0.0.1:8080/search-fields.html?payment=cancel",
         });
 
         res.json({ url: session.url });
