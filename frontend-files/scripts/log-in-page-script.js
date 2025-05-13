@@ -21,8 +21,13 @@ async function login(event) {
         const data = await response.json();
         if (data.success) {
             localStorage.setItem("username", data.username);
-            window.location.href = 'dashboard.html';
-            // window.location.href = 'http://localhost:3000/dashboard-page';
+            localStorage.setItem("statut", data.statut);
+
+            if (data.statut === 1 || data.statut === 0) {
+                window.location.href = 'dashboard.html';
+            } else if (data.statut === 2) {
+                window.location.href = 'field-owner-dashboard.html';
+            }
         } else {
             errorMessage.style.display = 'block';
         }

@@ -39,7 +39,7 @@ db.connect((err) => {
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
 
-  const query = 'SELECT username, nume, prenume, email, sporturi_preferate FROM SPORTIVI WHERE email = ? AND parola = ?';
+  const query = 'SELECT username, statut FROM SPORTIVI WHERE email = ? AND parola = ?';
 
   db.query(query, [email, password], (err, results) => {
       if (err) {
@@ -49,9 +49,22 @@ app.post('/login', (req, res) => {
 
       if (results.length > 0) {
           const user = results[0];
-          res.json({ success: true, message: 'Login successful!', username: user.username });
+          res.json({ success: true, message: 'Login successful!', username: user.username, statut: user.statut });
       } else {
-          res.json({ success: false, message: 'Invalid credentials. Please try again.' });
+        const queryOwners = 'SELECT username, statut FROM PROPRIETARI WHERE email = ? AND parola = ?';
+        db.query(queryOwners, [email, password], (err, resultsOwners) => {
+            if (err) {
+                res.status(500).json({ success: false, message: 'Error connecting to the database' });
+                return;
+            }
+
+            if (resultsOwners.length > 0) {
+                const owner = resultsOwners[0];
+                res.json({ success: true, message: 'Login successful!', username: owner.username, statut: owner.statut });
+            } else {
+                res.json({ success: false, message: 'Invalid credentials. Please try again.' });
+            }
+        });
       }
   });
 });
@@ -70,7 +83,20 @@ app.get('/get-user-profile/:username', (req, res) => {
       if (results.length > 0) {
           res.json({ success: true, user: results[0] });
       } else {
-          res.json({ success: false, message: 'User not found' });
+          const queryOwners = 'SELECT username, nume, prenume, email FROM PROPRIETARI WHERE username = ?';
+
+          db.query(queryOwners, [username], (err, resultsOwners) => {
+            if (err) {
+                res.status(500).json({ success: false, message: 'Error retrieving user profile' });
+                return;
+            }
+
+            if (resultsOwners.length > 0) {
+                res.json({ success: true, user: resultsOwners[0] });
+            } else {
+                res.json({ success: false, message: 'User not found' });
+            }
+        });
       }
   });
 });
@@ -471,6 +497,39 @@ app.get("/get-sports-fields", (_req, res) => {
         }
 
         res.json(results);
+    });
+});
+
+app.get("/get-owner-sports-fields/:username", (req, res) => { 
+    const username = req.params.username;
+
+    const query = `
+        SELECT id_teren, denumire_teren, denumire_sport, adresa, program, pret_ora
+        FROM terenuri_sportive
+        WHERE username_proprietar = ?`;
+
+    db.query(query, [username], (err, results) => {
+        if (err) {
+            console.error("Error fetching owner's fields:", err);
+            return res.status(500).json({ success: false, message: "Failed to fetch owner's sports fields" });
+        }
+
+        res.json(results);
+    });
+});
+
+app.put('/update-field', (req, res) => {
+    const { id_teren, pret_ora, program } = req.body;
+
+    const query = `UPDATE terenuri_sportive SET pret_ora = ?, program = ? WHERE id_teren = ?`;
+
+    db.query(query, [pret_ora, program, id_teren], (err) => {
+        if (err) {
+            console.error('Error updating field:', err);
+            return res.status(500).json({ success: false, message: 'Failed to update field' });
+        }
+
+        res.json({ success: true, message: 'Field updated successfully' });
     });
 });
 
