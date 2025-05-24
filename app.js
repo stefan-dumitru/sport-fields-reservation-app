@@ -256,35 +256,23 @@ app.post('/add-field', async (req, res) => {
 
   const id_teren = Math.floor(Math.random() * 1000000); 
 
-  const queryStatut = `SELECT statut FROM sportivi WHERE username = ?`;
-  db.query(queryStatut, [username], (err, result) => {
+  const statut = 'confirmat';
+  const oras = 'Bucharest';
+  const insertQuery = `
+      INSERT INTO terenuri_sportive (id_teren, denumire_sport, adresa, pret_ora, statut, denumire_teren, program, oras, sector, username_proprietar)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+  db.query(insertQuery, [id_teren, denumire_sport, adresa, pret_ora, statut, denumire_teren, program, oras, sector, username], (err) => {
       if (err) {
-          console.error('Error fetching user statut:', err);
+          console.error('Error inserting field:', err);
           return res.status(500).json({ success: false, message: 'An error occurred.' });
       }
-
-      if (result.length > 0) {
-          const statut = result[0].statut === 1 ? 'confirmat' : 'asteptare';
-          const oras = 'Bucharest';
-          const insertQuery = `
-              INSERT INTO terenuri_sportive (id_teren, denumire_sport, adresa, pret_ora, statut, denumire_teren, program, oras, sector)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-          `;
-          db.query(insertQuery, [id_teren, denumire_sport, adresa, pret_ora, statut, denumire_teren, program, oras, sector], (err) => {
-              if (err) {
-                  console.error('Error inserting field:', err);
-                  return res.status(500).json({ success: false, message: 'An error occurred.' });
-              }
-              res.json({ 
-                success: true, 
-                message: statut === 'confirmat' 
-                    ? 'Field added successfully!' 
-                    : 'Field added to the pending list. We will let you know when a trusted user approves it!' 
-            });
-          });
-      } else {
-          res.json({ success: false, message: 'User not found.' });
-      }
+      res.json({
+      success: true, 
+      message: statut === 'confirmat' 
+          ? 'Field added successfully!' 
+          : 'Field added to the pending list. We will let you know when a trusted user approves it!' 
+      });
   });
 });
 
@@ -484,6 +472,41 @@ app.get('/get-field-reservations/:id_teren', async (req, res) => {
     } catch (err) {
         console.error('Error in /get-field-reservations route:', err);
         res.status(500).json({ success: false, message: 'Failed to fetch reservations.' });
+    }
+});
+
+app.post('/get-owner-fields', async (req, res) => {
+    const { username } = req.body;
+
+    if (!username) {
+        return res.status(400).json({ success: false, message: 'Username is required.' });
+    }
+
+    try {
+        const fields = await new Promise((resolve, reject) => {
+            db.query(
+                `SELECT id_teren, denumire_sport, adresa, pret_ora, denumire_teren, program, sector 
+                 FROM terenuri_sportive 
+                 WHERE statut = 'confirmat' AND username_proprietar = ?`,
+                [username],
+                (err, result) => {
+                    if (err) return reject(err);
+                    resolve(result);
+                }
+            );
+        });
+
+        const fieldReservations = await Promise.all(
+            fields.map(async (field) => {
+                const reservations = await getFutureReservations(field.id_teren);
+                return { ...field, reservations };
+            })
+        );
+
+        res.json({ success: true, fields: fieldReservations });
+    } catch (error) {
+        console.error("Error fetching owner's fields:", error);
+        res.status(500).json({ success: false, message: "An error occurred. Please try again." });
     }
 });
 
