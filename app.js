@@ -24,6 +24,8 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+app.use(express.static('frontend-files'));
+
 const db = mysql.createConnection({
     host: process.env.HOST,
     user: process.env.USER,
@@ -145,7 +147,7 @@ app.post('/reset-password', (req, res) => {
         const resetToken = crypto.randomBytes(20).toString('hex');
         const currentTime = new Date();
 
-        currentTime.setHours(currentTime.getHours() + 3);
+        currentTime.setHours(currentTime.getHours() + 4);
 
         const resetExpires = currentTime.toISOString().slice(0, 19).replace('T', ' ');
 
@@ -902,5 +904,5 @@ app.get('/my-profile-page', (_req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log('Server running on http://localhost:${PORT}');
+  console.log(`Server running on http://localhost:${PORT}`);
 });
