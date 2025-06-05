@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function fetchMyFields(username) {
     try {
-        const response = await fetch(`http://localhost:3000/get-owner-sports-fields/${username}`);
+        const response = await fetch(`http://sport-fields-reservation-app-production.up.railway.app/get-owner-sports-fields/${username}`);
         const fields = await response.json();
 
         const tableBody = document.getElementById('pending-fields-body');

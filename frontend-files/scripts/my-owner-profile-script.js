@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     try {
-        const response = await fetch(`http://localhost:3000/get-user-profile/${username}`);
+        const response = await fetch(`http://sport-fields-reservation-app-production.up.railway.app/get-user-profile/${username}`);
         const data = await response.json();
 
         if (data.success) {

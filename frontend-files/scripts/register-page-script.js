@@ -70,7 +70,7 @@ async function register(event) {
 
     if (validateAccount(email, parola, confirmaParola)) {
         try {
-            const response = await fetch('http://localhost:3000/register', {
+            const response = await fetch('http://sport-fields-reservation-app-production.up.railway.app/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, nume, prenume, parola })

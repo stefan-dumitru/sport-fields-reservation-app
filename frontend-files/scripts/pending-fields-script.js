@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     try {
-        const userResponse = await fetch(`http://localhost:3000/user-status/${username}`);
+        const userResponse = await fetch(`http://sport-fields-reservation-app-production.up.railway.app/user-status/${username}`);
         const userData = await userResponse.json();
         let isTrusted = false;
         if (userData.success) {

@@ -12,7 +12,7 @@ async function login(event) {
     const errorMessage = document.getElementById('error-message');
 
     try {
-        const response = await fetch('http://localhost:3000/login', {
+        const response = await fetch('http://sport-fields-reservation-app-production.up.railway.app/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })

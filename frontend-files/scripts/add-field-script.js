@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const sector = document.getElementById("sector").value;
 
         try {
-            const response = await fetch("http://localhost:3000/add-field", {
+            const response = await fetch("http://sport-fields-reservation-app-production.up.railway.app/add-field", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username, denumire_sport: denumireSport, adresa, pret_ora: pretOra, denumire_teren: denumireTeren, program, sector })
