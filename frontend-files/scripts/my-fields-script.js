@@ -46,7 +46,7 @@ async function saveField(id_teren, button) {
     const schedule = row.querySelector('.schedule-input').value;
 
     try {
-        const response = await fetch('http://sport-fields-reservation-app-production.up.railway.app/update-field', {
+        const response = await fetch('https://sport-fields-reservation-app-production.up.railway.app/update-field', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id_teren, pret_ora: price, program: schedule })
