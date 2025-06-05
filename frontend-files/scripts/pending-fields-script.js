@@ -7,14 +7,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     try {
-        const userResponse = await fetch(`http://sport-fields-reservation-app-production.up.railway.app/user-status/${username}`);
+        const userResponse = await fetch(`https://sport-fields-reservation-app-production.up.railway.app/user-status/${username}`);
         const userData = await userResponse.json();
         let isTrusted = false;
         if (userData.success) {
             isTrusted = userData.statut === 1;
         }
 
-        const response = await fetch("http://localhost:3000/pending-fields");
+        const response = await fetch("https://sport-fields-reservation-app-production.up.railway.app/pending-fields");
         const data = await response.json();
 
         if (data.success) {

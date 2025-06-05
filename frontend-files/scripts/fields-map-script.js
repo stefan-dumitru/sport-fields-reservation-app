@@ -27,7 +27,7 @@ function initMap() {
 
     showUserLocation();
         
-    fetch("http://sport-fields-reservation-app-production.up.railway.app/get-sports-fields")
+    fetch("https://sport-fields-reservation-app-production.up.railway.app/get-sports-fields")
         .then((response) => response.json())
         .then(async (fields) => {
             populateFieldSelector(fields);
@@ -37,7 +37,7 @@ function initMap() {
         
                 try {
                     const response = await fetch(
-                        `http://sport-fields-reservation-app-production.up.railway.app/get-coordinates?address=${encodeURIComponent(address)}`
+                        `https://sport-fields-reservation-app-production.up.railway.app/get-coordinates?address=${encodeURIComponent(address)}`
                     );
                     const data = await response.json();
         
@@ -255,7 +255,7 @@ function addDragSelectionListeners(selectedDate, fieldPricePerHour) {
                 const currentFieldId = cell.getAttribute("data-field-id");
 
                 try {
-                    const response = await fetch(`http://sport-fields-reservation-app-production.up.railway.app/get-user-reservations?username=${username}&date=${selectedDate}`);
+                    const response = await fetch(`https://sport-fields-reservation-app-production.up.railway.app/get-user-reservations?username=${username}&date=${selectedDate}`);
                     const userReservations = await response.json();
         
                     if (userReservations.result.length >= 3) {
@@ -271,7 +271,7 @@ function addDragSelectionListeners(selectedDate, fieldPricePerHour) {
                 }
 
                 try {
-                    const response = await fetch(`http://sport-fields-reservation-app-production.up.railway.app/get-user-reservations-for-field?username=${username}&date=${selectedDate}&fieldId=${currentFieldId}`);
+                    const response = await fetch(`https://sport-fields-reservation-app-production.up.railway.app/get-user-reservations-for-field?username=${username}&date=${selectedDate}&fieldId=${currentFieldId}`);
                     const fieldReservations = await response.json();
                                 
                     if (fieldReservations.result.length >= 1) {
@@ -302,7 +302,7 @@ function addDragSelectionListeners(selectedDate, fieldPricePerHour) {
                     };
 
                     try {
-                        const response = await fetch("http://sport-fields-reservation-app-production.up.railway.app/make-reservation", {
+                        const response = await fetch("https://sport-fields-reservation-app-production.up.railway.app/make-reservation", {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify(reservationDetails),
@@ -313,7 +313,7 @@ function addDragSelectionListeners(selectedDate, fieldPricePerHour) {
                             alert("Reservation made successfully!");
 
                             try {
-                                const paymentResponse = await fetch("http://sport-fields-reservation-app-production.up.railway.app/create-checkout-session", {
+                                const paymentResponse = await fetch("https://sport-fields-reservation-app-production.up.railway.app/create-checkout-session", {
                                     method: "POST",
                                     headers: { "Content-Type": "application/json" },
                                     body: JSON.stringify({
@@ -466,7 +466,7 @@ function fetchReservations(id_teren) {
         return;
     }
 
-    fetch(`http://sport-fields-reservation-app-production.up.railway.app/get-field-reservations/${id_teren}`)
+    fetch(`https://sport-fields-reservation-app-production.up.railway.app/get-field-reservations/${id_teren}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {

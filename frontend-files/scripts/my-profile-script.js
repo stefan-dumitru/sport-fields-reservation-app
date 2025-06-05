@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     try {
-        const response = await fetch(`http://sport-fields-reservation-app-production.up.railway.app/get-user-profile/${username}`);
+        const response = await fetch(`https://sport-fields-reservation-app-production.up.railway.app/get-user-profile/${username}`);
         const data = await response.json();
 
         if (data.success) {
@@ -49,7 +49,7 @@ document.getElementById("save-sports").addEventListener("click", async () => {
 
     const username = localStorage.getItem("username");
     try {
-        const response = await fetch(`http://localhost:3000/update-favourite-sports/${username}`, {
+        const response = await fetch(`https://localhost:3000/update-favourite-sports/${username}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ sporturi_preferate: favouriteSportsString }),
