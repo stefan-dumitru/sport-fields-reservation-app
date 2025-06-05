@@ -27,21 +27,37 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('frontend-files'));
 
 const db = mysql.createConnection({
-    host: process.env.HOST,
-    user: process.env.USER,
-    password: process.env.PASSWORD,
-    database: process.env.DATABASE
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME
 });
-  
+
 db.connect((err) => {
-  if (err) throw err;
-  console.log('Connected to MySQL database!');
+  if (err) {
+    console.error('Database connection error:', err);
+    return;
+  }
+  console.log('Connected to Railway MySQL!');
 });
+
+// const db = mysql.createConnection({
+//     host: process.env.HOST,
+//     user: process.env.USER,
+//     password: process.env.PASSWORD,
+//     database: process.env.DATABASE
+// });
+  
+// db.connect((err) => {
+//   if (err) throw err;
+//   console.log('Connected to MySQL database!');
+// });
 
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
 
-  const query = 'SELECT username, statut FROM SPORTIVI WHERE email = ? AND parola = ?';
+  const query = 'SELECT username, statut FROM sportivi WHERE email = ? AND parola = ?';
 
   db.query(query, [email, password], (err, results) => {
       if (err) {
@@ -53,7 +69,7 @@ app.post('/login', (req, res) => {
           const user = results[0];
           res.json({ success: true, message: 'Login successful!', username: user.username, statut: user.statut });
       } else {
-        const queryOwners = 'SELECT username, statut FROM PROPRIETARI WHERE email = ? AND parola = ?';
+        const queryOwners = 'SELECT username, statut FROM proprietari WHERE email = ? AND parola = ?';
         db.query(queryOwners, [email, password], (err, resultsOwners) => {
             if (err) {
                 res.status(500).json({ success: false, message: 'Error connecting to the database' });
@@ -74,7 +90,7 @@ app.post('/login', (req, res) => {
 app.get('/get-user-profile/:username', (req, res) => {
   const { username } = req.params;
 
-  const query = 'SELECT username, nume, prenume, email, sporturi_preferate FROM SPORTIVI WHERE username = ?';
+  const query = 'SELECT username, nume, prenume, email, sporturi_preferate FROM sportivi WHERE username = ?';
 
   db.query(query, [username], (err, results) => {
       if (err) {
@@ -85,7 +101,7 @@ app.get('/get-user-profile/:username', (req, res) => {
       if (results.length > 0) {
           res.json({ success: true, user: results[0] });
       } else {
-          const queryOwners = 'SELECT username, nume, prenume, email FROM PROPRIETARI WHERE username = ?';
+          const queryOwners = 'SELECT username, nume, prenume, email FROM proprietari WHERE username = ?';
 
           db.query(queryOwners, [username], (err, resultsOwners) => {
             if (err) {
@@ -407,7 +423,7 @@ function getFutureReservations(id_teren) {
     return new Promise((resolve, reject) => {
         db.query(
             `SELECT data_rezervare, ora_inceput, ora_sfarsit
-              FROM REZERVARI
+              FROM rezervari
               WHERE id_teren = ?
               ORDER BY data_rezervare, ora_inceput`,
             [id_teren],
@@ -587,7 +603,7 @@ app.get("/get-coordinates", async (req, res) => {
 app.get("/get-user-reservations", async (req, res) => {
     const { username, date } = req.query;
 
-    const query = `SELECT * FROM REZERVARI WHERE username_sportiv = ? AND data_rezervare = ?`;
+    const query = `SELECT * FROM rezervari WHERE username_sportiv = ? AND data_rezervare = ?`;
     db.query(query, [username, date], (err, result) => {
         if (err) {
             console.error('Error getting user reservations:', err);
@@ -601,7 +617,7 @@ app.get("/get-user-reservations", async (req, res) => {
 app.get("/get-user-reservations-for-field", async (req, res) => {
     const { username, date, fieldId } = req.query;
 
-    const query = `SELECT * FROM REZERVARI WHERE username_sportiv = ? AND data_rezervare = ? AND id_teren = ?`;
+    const query = `SELECT * FROM rezervari WHERE username_sportiv = ? AND data_rezervare = ? AND id_teren = ?`;
     db.query(query, [username, date, fieldId], (err, result) => {
         if (err) {
             console.error('Error getting user reservations:', err);
