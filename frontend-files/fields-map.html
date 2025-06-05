@@ -95,7 +95,7 @@
 <script>
     async function loadGoogleMapsAPI() {
         try {
-            const response = await fetch('http://localhost:3000/get-google-maps-key');
+            const response = await fetch('http://sport-fields-reservation-app-production.up.railway.app/get-google-maps-key');
             const data = await response.json();
             const apiKey = data.apiKey;
 

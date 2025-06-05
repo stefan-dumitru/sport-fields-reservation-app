@@ -53,7 +53,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     if (userConfirmed) {
                         try {
                             const confirmResponse = await fetch(
-                                `http://localhost:3000/confirm-field/${field.id_teren}`,
+                                `https://sport-fields-reservation-app-production.up.railway.app/confirm-field/${field.id_teren}`,
                                 { method: "PUT" }
                             );
                             const confirmData = await confirmResponse.json();
@@ -74,7 +74,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     if (userRejected) {
                         try {
                             const rejectResponse = await fetch(
-                                `http://localhost:3000/reject-field/${field.id_teren}`,
+                                `https://sport-fields-reservation-app-production.up.railway.app/reject-field/${field.id_teren}`,
                                 { method: "DELETE" }
                             );
                             const rejectData = await rejectResponse.json();
