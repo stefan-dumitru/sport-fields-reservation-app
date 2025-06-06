@@ -5,6 +5,8 @@ const axios = require('axios');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
+const moment = require('moment-timezone');
+
 // const { Translate } = require("@google-cloud/translate").v2;
 
 const crypto = require('crypto');
@@ -449,9 +451,12 @@ app.post("/make-reservation", async (req, res) => {
     const parsedStartTime = new Date(ora_inceput);
     const newOra_inceput = `${parsedStartTime.getHours().toString().padStart(2, "0")}:${parsedStartTime.getMinutes().toString().padStart(2, "0")}`;
 
-    const oraInceputDatetime = `${data_rezervare} ${ora_inceput}:00`;
-    const oraSfarsitDatetime = `${data_rezervare} ${ora_sfarsit}:00`;
-    
+    const oraInceputLocal = `${data_rezervare} ${ora_inceput}:00`;
+    const oraSfarsitLocal = `${data_rezervare} ${ora_sfarsit}:00`;
+
+    const oraInceputUTC = moment.tz(oraInceputLocal, 'YYYY-MM-DD HH:mm:ss', 'Europe/Bucharest').utc().format('YYYY-MM-DD HH:mm:ss');
+    const oraSfarsitUTC = moment.tz(oraSfarsitLocal, 'YYYY-MM-DD HH:mm:ss', 'Europe/Bucharest').utc().format('YYYY-MM-DD HH:mm:ss');
+
     if (reservationDate < today.setHours(0, 0, 0, 0)) {
         return res.json({ success: false, message: "Nu poti face rezervari pentru zilele din trecut!" });
     }
@@ -466,7 +471,7 @@ app.post("/make-reservation", async (req, res) => {
             VALUES (?, ?, ?, ?, ?, ?)
         `;
 
-        db.query(query, [id_rezervare, username, id_teren, data_rezervare, oraInceputDatetime, oraSfarsitDatetime], (err) => {
+        db.query(query, [id_rezervare, username, id_teren, data_rezervare, oraInceputUTC, oraSfarsitUTC], (err) => {
             if (err) {
                 console.error("Error inserting reservation:", err);
                 res.json({ success: false, message: "Error making reservation." });
