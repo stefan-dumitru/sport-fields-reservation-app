@@ -867,8 +867,8 @@ app.post("/create-checkout-session", async (req, res) => {
                 quantity: 1,
             }],
             mode: "payment",
-            success_url: "http://127.0.0.1:8080/fields-map.html?payment=success",
-            cancel_url: "http://127.0.0.1:8080/fields-map.html?payment=cancel",
+            success_url: "https://sport-fields-reservation-app-production.up.railway.app/fields-map.html?payment=success",
+            cancel_url: "https://sport-fields-reservation-app-production.up.railway.app/fields-map.html?payment=cancel",
         });
 
         res.json({ url: session.url });
@@ -893,8 +893,8 @@ app.post("/create-checkout-session-new", async (req, res) => {
                 quantity: 1,
             }],
             mode: "payment",
-            success_url: "http://127.0.0.1:8080/search-fields.html?payment=success",
-            cancel_url: "http://127.0.0.1:8080/search-fields.html?payment=cancel",
+            success_url: "https://sport-fields-reservation-app-production.up.railway.app/search-fields.html?payment=success",
+            cancel_url: "https://sport-fields-reservation-app-production.up.railway.app/search-fields.html?payment=cancel",
         });
 
         res.json({ url: session.url });
