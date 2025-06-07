@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", async () => {
     const username = localStorage.getItem("username");
     if (!username) {
-        alert("You must log in first!");
+        alert("Trebuie sa fii logat mai intai!");
         window.location.href = "log-in-page.html";
         return;
     }
@@ -60,10 +60,10 @@ document.getElementById("save-sports").addEventListener("click", async () => {
             alert("Lista de sporturi preferate a fost actualizata cu succes!");
             location.reload();
         } else {
-            alert(data.message || "Failed to update favourite sports.");
+            alert(data.message || "Nu s-a putut modifica lista sporturilor preferate. Incearca din nou.");
         }
     } catch (error) {
         console.error("Error updating favourite sports:", error);
-        alert("An error occurred. Please try again.");
+        alert("A aparut o eroare. Incearca din nou.");
     }
 });

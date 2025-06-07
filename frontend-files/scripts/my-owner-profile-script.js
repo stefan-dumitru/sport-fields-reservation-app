@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", async () => {
     const username = localStorage.getItem("username");
     if (!username) {
-        alert("You must log in first!");
+        alert("Trebuie sa fii logat mai intai");
         window.location.href = "log-in-page.html";
         return;
     }

@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     const username = localStorage.getItem('username');
     if (!username) {
-        alert('Not logged in.');
+        alert("Trebuie sa fii logat mai intai!");
         window.location.href = 'login.html';
         return;
     }
@@ -36,7 +36,7 @@ async function fetchMyFields(username) {
 
     } catch (error) {
         console.error('Error fetching fields:', error);
-        alert('Failed to load your fields.');
+        alert("Terenurile tale nu au putut fi incarcate. Incearca din nou.");
     }
 }
 
@@ -55,12 +55,12 @@ async function saveField(id_teren, button) {
         const result = await response.json();
 
         if (result.success) {
-            alert('Field updated successfully!');
+            alert("Datele terenului au fost modificate cu succes!");
         } else {
-            alert('Failed to update field.');
+            alert("Datele terenului nu au fost modificate! Incearca din nou.");
         }
     } catch (error) {
         console.error('Error updating field:', error);
-        alert('An error occurred while updating.');
+        alert("A aparut o eroare. Incearca din nou.");
     }
 }

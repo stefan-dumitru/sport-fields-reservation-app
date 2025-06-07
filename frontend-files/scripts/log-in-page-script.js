@@ -33,6 +33,6 @@ async function login(event) {
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('An error occurred. Please try again.');
+        alert("A aparut o eroare. Incearca din nou.");
     }
 }

@@ -89,7 +89,7 @@ document.getElementById("search-form").addEventListener("submit", async (event) 
         }
     } catch (error) {
         console.error("Error fetching fields:", error);
-        alert("An error occurred while searching. Please try again.");
+        alert("A aparut o eroare. Incearca din nou.");
         return;
     }
 

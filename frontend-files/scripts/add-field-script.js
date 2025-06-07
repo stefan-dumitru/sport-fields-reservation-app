@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     const username = localStorage.getItem("username");
     if (!username) {
-        alert("You must log in first!");
+        alert("Trebuie sa fii logat mai intai!");
         window.location.href = "log-in-page.html";
         return;
     }
@@ -29,11 +29,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 alert(data.message);
                 form.reset();
             } else {
-                alert(data.message || "An error occurred.");
+                alert(data.message || "A aparut o eroare. Incearca din nou");
             }
         } catch (error) {
             console.error("Error adding field:", error);
-            alert("An error occurred while adding the field.");
+            alert("Terenul nu a putut fi adaugat. Incearca din nou.");
         }
     });
 });

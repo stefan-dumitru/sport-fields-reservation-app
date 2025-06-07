@@ -7,9 +7,9 @@ let reservationPopup;
 document.addEventListener("DOMContentLoaded", function () {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get("payment") === "success") {
-        alert("Payment successful! Your reservation has been confirmed.");
+        alert("Plata a fost realizata cu succes!");
     } else if (urlParams.get("payment") === "cancel") {
-        alert("Payment canceled. You can still pay for the reservation by accessing the reservation history.");
+        alert("Plata nu a fost finalizata. Inca o poti face din istoricul rezervarilor.");
     }
 });
 
@@ -216,7 +216,7 @@ function addDragSelectionListeners(selectedDate, fieldPricePerHour) {
 
                 if (parseInt(currentFieldId) !== parseInt(startCell.fieldId)) {
                     isDragging = false;
-                    alert("You can only select cells from the same field.");
+                    alert("Rezervarea trebuie facuta pentru un singur teren!");
                     selectedCells.forEach(c => c.style.backgroundColor = "green");
                     selectedCells = [];
                     return;
@@ -225,7 +225,7 @@ function addDragSelectionListeners(selectedDate, fieldPricePerHour) {
                 if (cell.style.backgroundColor === "green" && !selectedCells.includes(cell)) {
                     if (selectedCells.length >= 3) { 
                         isDragging = false;
-                        alert("You cannot make a reservation longer than 3 hours.");
+                        alert("Nu poti face rezervari mai lungi de 3 ore!");
                         selectedCells.forEach(c => c.style.backgroundColor = "green");
                         selectedCells = [];
                         return;
@@ -237,7 +237,7 @@ function addDragSelectionListeners(selectedDate, fieldPricePerHour) {
 
                 if (cell.style.backgroundColor === "red" || cell.style.backgroundColor === "gray") {
                     isDragging = false;
-                    alert("Dragging stopped due to invalid cell.");
+                    alert("Terenul nu este disponibil in intervalul selectat!");
                     selectedCells.forEach(c => c.style.backgroundColor = "green");
                     selectedCells = [];
                 }
@@ -259,14 +259,14 @@ function addDragSelectionListeners(selectedDate, fieldPricePerHour) {
                     const userReservations = await response.json();
         
                     if (userReservations.result.length >= 3) {
-                        alert("You have reached the maximum of 3 reservations for this day.");
+                        alert("Ai atins limita de 3 rezervari pentru aceasta zi! Alege o alta zi in care doresti sa rezervi terenul.");
                         selectedCells.forEach((c) => (c.style.backgroundColor = "green"));
                         selectedCells = [];
                         return;
                     }
                 } catch (error) {
                     console.error("Error fetching user reservations:", error);
-                    alert("An error occurred while checking your reservations.");
+                    alert("A aparut o eroare in timpul verificarii rezervarilor.");
                     return;
                 }
 
@@ -275,14 +275,14 @@ function addDragSelectionListeners(selectedDate, fieldPricePerHour) {
                     const fieldReservations = await response.json();
                                 
                     if (fieldReservations.result.length >= 1) {
-                        alert("You can only make one reservation per field per day.");
+                        alert("Poti face maxim o rezervare pentru un teren intr-o zi!");
                         selectedCells.forEach((c) => (c.style.backgroundColor = "green"));
                         selectedCells = [];
                         return;
                     }
                 } catch (error) {
                     console.error("Error fetching user field reservations:", error);
-                    alert("An error occurred while checking your reservations.");
+                    alert("A aparut o eroare in timpul verificarii rezervarilor pentru teren.");
                 }
 
                 const totalHours = selectedCells.length;
@@ -310,7 +310,7 @@ function addDragSelectionListeners(selectedDate, fieldPricePerHour) {
 
                         const result = await response.json();
                         if (result.success) {
-                            alert("Reservation made successfully!");
+                            alert("Rezervarea a fost facuta cu succes!");
 
                             try {
                                 const paymentResponse = await fetch("https://sport-fields-reservation-app-production.up.railway.app/create-checkout-session", {
@@ -331,23 +331,23 @@ function addDragSelectionListeners(selectedDate, fieldPricePerHour) {
                                 if (paymentData.url) {
                                     window.location.href = paymentData.url;
                                 } else {
-                                    alert("Error processing payment. Please try again.");
+                                    alert("Plata nu a fost procesata. Incearca din nou.");
                                     selectedCells.forEach(c => c.style.backgroundColor = "green");
                                 }
                             } catch (error) {
                                 console.error("Error processing payment:", error);
-                                alert("An error occurred while processing the payment.");
+                                alert("A aparut o eroare in timpul procesarii platii");
                                 selectedCells.forEach(c => c.style.backgroundColor = "green");
                             }
 
                             selectedCells.forEach(c => c.style.backgroundColor = "red");
                         } else {
-                            alert(result.message || "Failed to make reservation.");
+                            alert(result.message || "Nu s-a putut face rezervarea.");
                             selectedCells.forEach(c => c.style.backgroundColor = "green");
                         }
                     } catch (error) {
                         console.error("Error making reservation:", error);
-                        alert("An error occurred while making the reservation.");
+                        alert("A aparut o eroare. Rezervarea nu a fost facuta.");
                         selectedCells.forEach(c => c.style.backgroundColor = "green");
                     }
                 } else {

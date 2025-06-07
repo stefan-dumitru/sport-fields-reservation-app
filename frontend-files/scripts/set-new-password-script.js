@@ -55,11 +55,10 @@ async function setNewPassword(event) {
 
             const data = await response.json();
             if (data.success) {
-                alert('Password updated successfully!');
-                // window.location.href = 'http://localhost:8080/login-page';
+                alert("Parola a fost schimbata cu succes!");
                 window.location.href = 'index.html';
             } else {
-                alert('Invalid or expired token.');
+                alert("A expirat timpul de resetare a parolei. Incearca din nou.");
             }
         } catch (error) {
             console.error('Error:', error);

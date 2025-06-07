@@ -7,7 +7,7 @@ function addHours(date, hours) {
 document.addEventListener("DOMContentLoaded", async () => {
     const username = localStorage.getItem("username");
     if (!username) {
-        alert("You must log in first!");
+        alert("Trebuie sa fii logat mai intai!");
         window.location.href = "log-in-page.html";
         return;
     }
@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                                 alert("Rezervarea a fost anulata cu succes!");
                                 row.remove();
                             } else {
-                                alert("Error canceling reservation. Please try again.");
+                                alert("A aparut o eroare. Incearca din nou.");
                             }
                         } catch (error) {
                             console.error("Error canceling reservation:", error);
@@ -64,7 +64,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 });
             });
         } else {
-            alert(data.message || "No reservations found.");
+            alert(data.message || "Nu s-a gasit nicio rezervare.");
         }
     } catch (error) {
         console.error("Error fetching reservations:", error);
