@@ -296,68 +296,18 @@ app.post('/add-field', async (req, res) => {
   });
 });
 
-app.get('/pending-fields', (_req, res) => {
-  const query = `SELECT id_teren, denumire_sport, adresa, pret_ora, denumire_teren, program, sector 
-                 FROM terenuri_sportive 
-                 WHERE statut = 'asteptare'`;
-  db.query(query, (err, result) => {
-      if (err) {
-          console.error('Error fetching pending fields:', err);
-          res.json({ success: false, message: 'An error occurred.' });
-      } else {
-          res.json({ success: true, fields: result });
-      }
-  });
-});
-
-app.get('/user-status/:username', (req, res) => {
-  const { username } = req.params;
-
-  const query = 'SELECT statut FROM sportivi WHERE username = ?';
-  db.query(query, [username], (err, result) => {
-      if (err) {
-          console.error('Error fetching user status:', err);
-          return res.status(500).json({ success: false, message: 'An error occurred while fetching user status.' });
-      }
-
-      if (result.length > 0) {
-          res.json({ success: true, statut: result[0].statut });
-      } else {
-          res.json({ success: false, message: 'User not found.' });
-      }
-  });
-});
-
-app.put('/confirm-field/:id', (req, res) => {
-  const { id } = req.params;
-
-  const query = "UPDATE terenuri_sportive SET statut = 'confirmat' WHERE id_teren = ?";
-  db.query(query, [id], (err, result) => {
-      if (err) {
-          console.error('Error confirming field:', err);
-          return res.status(500).json({ success: false, message: 'Error confirming the field.' });
-      }
-
-      if (result.affectedRows > 0) {
-          res.json({ success: true, message: 'Field confirmed successfully!' });
-      } else {
-          res.json({ success: false, message: 'Field not found.' });
-      }
-  });
-});
-
-app.delete('/reject-field/:id', (req, res) => {
+app.delete('/delete-field/:id', (req, res) => {
   const { id } = req.params;
 
   const query = "DELETE FROM terenuri_sportive WHERE id_teren = ?";
   db.query(query, [id], (err, result) => {
       if (err) {
-          console.error('Error rejecting field:', err);
-          return res.status(500).json({ success: false, message: 'Error rejecting the field.' });
+          console.error('Error deleting field:', err);
+          return res.status(500).json({ success: false, message: 'Error deleting the field.' });
       }
 
       if (result.affectedRows > 0) {
-          res.json({ success: true, message: 'Field rejected successfully!' });
+          res.json({ success: true, message: 'Field deleted successfully!' });
       } else {
           res.json({ success: false, message: 'Field not found.' });
       }

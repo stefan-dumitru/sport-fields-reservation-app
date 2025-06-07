@@ -57,7 +57,7 @@ async function setNewPassword(event) {
             if (data.success) {
                 alert('Password updated successfully!');
                 // window.location.href = 'http://localhost:8080/login-page';
-                window.location.href = 'http://127.0.0.1:8080/index.html';
+                window.location.href = 'index.html';
             } else {
                 alert('Invalid or expired token.');
             }
