@@ -176,7 +176,7 @@ app.post('/reset-password', (req, res) => {
                 return res.json({ success: false, message: 'Failed to generate reset token.' });
             }
 
-            const resetLink = `http://localhost:8080/set-new-password?token=${resetToken}`;
+            const resetLink = `https://sport-fields-reservation-app-production.up.railway.app/set-new-password?token=${resetToken}`;
             const mailOptions = {
                 from: process.env.USER_EMAIL,
                 to: email,
