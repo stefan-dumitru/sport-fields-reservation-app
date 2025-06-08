@@ -27,7 +27,8 @@ async function fetchMyFields(username) {
                 <td><input type="number" min="0" value="${field.pret_ora}" class="form-control price-input" /></td>
                 <td><input type="text" value="${field.program}" class="form-control schedule-input" /></td>
                 <td>
-                    <button class="btn btn-primary" onclick="saveField(${field.id_teren}, this)">Salveaza</button>
+                    <button class="btn btn-primary me-2" onclick="saveField(${field.id_teren}, this)">Salveaza</button>
+                    <button class="btn btn-danger" onclick="deleteField(${field.id_teren})">Sterge teren</button>
                 </td>
             `;
 
@@ -62,5 +63,29 @@ async function saveField(id_teren, button) {
     } catch (error) {
         console.error('Error updating field:', error);
         alert("A aparut o eroare. Incearca din nou.");
+    }
+}
+
+async function deleteField(id_teren) {
+    const confirmDelete = confirm("Esti sigur ca vrei sa stergi acest teren?");
+    if (!confirmDelete) return;
+
+    try {
+        const response = await fetch(`https://sport-fields-reservation-app-production.up.railway.app/delete-field/${id_teren}`, {
+            method: 'DELETE'
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert("Teren sters cu succes.");
+            const username = localStorage.getItem('username');
+            fetchMyFields(username);
+        } else {
+            alert("Terenul nu a putut fi sters. Incearca din nou.");
+        }
+    } catch (error) {
+        console.error('Error deleting field:', error);
+        alert("A aparut o eroare la stergerea terenului. Incearca din nou.");
     }
 }
