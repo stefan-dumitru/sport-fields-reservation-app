@@ -176,7 +176,7 @@ app.post('/reset-password', (req, res) => {
                 return res.json({ success: false, message: 'Failed to generate reset token.' });
             }
 
-            const resetLink = `https://sport-fields-reservation-app-production.up.railway.app/set-new-password?token=${resetToken}`;
+            const resetLink = `https://bookfield.up.railway.app/set-new-password?token=${resetToken}`;
             const mailOptions = {
                 from: process.env.USER_EMAIL,
                 to: email,
@@ -817,8 +817,8 @@ app.post("/create-checkout-session", async (req, res) => {
                 quantity: 1,
             }],
             mode: "payment",
-            success_url: "https://sport-fields-reservation-app-production.up.railway.app/fields-map.html?payment=success",
-            cancel_url: "https://sport-fields-reservation-app-production.up.railway.app/fields-map.html?payment=cancel",
+            success_url: "https://bookfield.up.railway.app/fields-map.html?payment=success",
+            cancel_url: "https://bookfield.up.railway.app/fields-map.html?payment=cancel",
         });
 
         res.json({ url: session.url });
@@ -843,8 +843,8 @@ app.post("/create-checkout-session-new", async (req, res) => {
                 quantity: 1,
             }],
             mode: "payment",
-            success_url: "https://sport-fields-reservation-app-production.up.railway.app/search-fields.html?payment=success",
-            cancel_url: "https://sport-fields-reservation-app-production.up.railway.app/search-fields.html?payment=cancel",
+            success_url: "https://bookfield.up.railway.app/search-fields.html?payment=success",
+            cancel_url: "https://bookfield.up.railway.app/search-fields.html?payment=cancel",
         });
 
         res.json({ url: session.url });

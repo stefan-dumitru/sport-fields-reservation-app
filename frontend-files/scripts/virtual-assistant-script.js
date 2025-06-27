@@ -94,7 +94,7 @@ form.addEventListener('submit', (e) => {
     chatbox.appendChild(typingAnimation);
 
     const params = new URLSearchParams(userInfo).toString();
-    const eventSource = new EventSource(`https://sport-fields-reservation-app-production.up.railway.app/get-training-plan?${params}`);
+    const eventSource = new EventSource(`https://bookfield.up.railway.app/get-training-plan?${params}`);
 
     eventSource.onmessage = (event) => {
         const data = JSON.parse(event.data);
