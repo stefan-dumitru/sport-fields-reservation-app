@@ -247,9 +247,7 @@ document.getElementById("search-form").addEventListener("submit", async (event) 
                                 };
         
                                 try {
-                                    const response = await fetch(
-                                        "bookfield.up.railway.app/make-reservation",
-                                        {
+                                    const response = await fetch("https://bookfield.up.railway.app/make-reservation", {
                                             method: "POST",
                                             headers: { "Content-Type": "application/json" },
                                             body: JSON.stringify(reservationDetails),
