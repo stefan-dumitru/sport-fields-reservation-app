@@ -30,6 +30,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                 const endTime = new Date(reservation.ora_sfarsit).toTimeString().split(' ')[0];
 
                 const row = document.createElement("tr");
+
+                const fullStartDate = new Date(reservation.ora_inceput);
+                const isFuture = fullStartDate > new Date();
+
                 row.innerHTML = `
                     <td>${reservation.id_rezervare}</td>
                     <td>${reservation.denumire_teren}</td>
@@ -37,31 +41,33 @@ document.addEventListener("DOMContentLoaded", async () => {
                     <td>${startTime}</td>
                     <td>${endTime}</td>
                     <td>
-                        <button class="btn btn-danger cancel-btn">Anuleaza</button>
+                        <button class="btn btn-danger cancel-btn" ${!isFuture ? "disabled title='Nu se poate anula o rezervare trecuta'" : ""}>Anuleaza</button>
                     </td>
                 `;
                 tbody.appendChild(row);
 
-                row.querySelector(".cancel-btn").addEventListener("click", async () => {
-                    const confirmCancel = confirm("Esti sigur ca vrei sa anulezi rezervarea?");
-                    if (confirmCancel) {
-                        try {
-                            const cancelResponse = await fetch(
-                                `https://bookfield.up.railway.app/cancel-reservation/${reservation.id_rezervare}`,
-                                { method: "DELETE" }
-                            );
-                            const cancelData = await cancelResponse.json();
-                            if (cancelData.success) {
-                                alert("Rezervarea a fost anulata cu succes!");
-                                row.remove();
-                            } else {
-                                alert("A aparut o eroare. Incearca din nou.");
+                if (isFuture) {
+                    row.querySelector(".cancel-btn").addEventListener("click", async () => {
+                        const confirmCancel = confirm("Esti sigur ca vrei sa anulezi rezervarea?");
+                        if (confirmCancel) {
+                            try {
+                                const cancelResponse = await fetch(
+                                    `https://bookfield.up.railway.app/cancel-reservation/${reservation.id_rezervare}`,
+                                    { method: "DELETE" }
+                                );
+                                const cancelData = await cancelResponse.json();
+                                if (cancelData.success) {
+                                    alert("Rezervarea a fost anulata cu succes!");
+                                    row.remove();
+                                } else {
+                                    alert("A aparut o eroare. Incearca din nou.");
+                                }
+                            } catch (error) {
+                                console.error("Error canceling reservation:", error);
                             }
-                        } catch (error) {
-                            console.error("Error canceling reservation:", error);
                         }
-                    }
-                });
+                    });
+                }
             });
         } else {
             alert(data.message || "Nu s-a gasit nicio rezervare.");
