@@ -178,7 +178,7 @@ document.getElementById("cancel-reservation-btn").addEventListener("click", asyn
     const modal = document.getElementById("reservation-modal");
     const reservationId = modal.dataset.reservationId;
 
-    const confirmed = confirm("Esti sigur ca vrei sa stergi aceasat rezervare?");
+    const confirmed = confirm("Esti sigur ca vrei sa anulezi aceasta rezervare?");
     if (!confirmed) return;
 
     try {
@@ -189,15 +189,15 @@ document.getElementById("cancel-reservation-btn").addEventListener("click", asyn
         const data = await res.json();
 
         if (data.success) {
-            alert("Rezervarea a fost stearsa cu succes.");
+            alert("Rezervarea a fost anulata cu succes.");
             closeModal();
             document.getElementById("search-form").dispatchEvent(new Event("submit"));
         } else {
-            alert("Nu s-a putut sterge rezervarea. Incearca din nou.");
+            alert("Nu s-a putut anula rezervarea. Incearca din nou.");
         }
     } catch (err) {
         console.error("Error cancelling reservation:", err);
-        alert("An error occurred.");
+        alert("A aparut o eroare. Incearca din nou.");
     }
 });
 
