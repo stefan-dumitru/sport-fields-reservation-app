@@ -374,7 +374,7 @@ app.post('/search-fields', async (req, res) => {
 function getFutureReservations(id_teren) {
     return new Promise((resolve, reject) => {
         db.query(
-            `SELECT data_rezervare, ora_inceput, ora_sfarsit
+            `SELECT id_rezervare, username_sportiv, data_rezervare, ora_inceput, ora_sfarsit
               FROM rezervari
               WHERE id_teren = ?
               ORDER BY data_rezervare, ora_inceput`,

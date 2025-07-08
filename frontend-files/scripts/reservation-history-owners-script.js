@@ -123,7 +123,22 @@ document.getElementById("search-form").addEventListener("submit", async (event) 
         
             if (isWithinSchedule(i, field.program)) {
                 if (isReserved(hourString, reservationsForDate)) {
-                    cell.style.backgroundColor = "red";                    
+                    cell.style.backgroundColor = "red";
+
+                    const matchedReservation = reservationsForDate.find((res) => {
+                    	const resStart = parseInt(res.ora_inceput.split(":")[0], 10);
+                    	const resEnd = parseInt(res.ora_sfarsit.split(":")[0], 10);
+                    	return i >= resStart && i < resEnd;
+                	});
+
+                	if (matchedReservation) {
+                    	cell.classList.add("reserved-cell");
+
+                    	cell.dataset.reservationId = matchedReservation.id_rezervare;
+                    	cell.dataset.username = matchedReservation.username_sportiv;
+                    	cell.dataset.startTime = matchedReservation.ora_inceput;
+                    	cell.dataset.endTime = matchedReservation.ora_sfarsit;
+                	}
                 } else {
                     cell.style.backgroundColor = "green";
                 }
@@ -142,3 +157,50 @@ document.getElementById("search-form").addEventListener("submit", async (event) 
         fieldDescriptions.appendChild(description);
     });
 });
+
+document.addEventListener("click", function (e) {
+    if (e.target.classList.contains("reserved-cell")) {
+        const reservationId = e.target.dataset.reservationId;
+        const username = e.target.dataset.username;
+        const startTime = e.target.dataset.startTime;
+        const endTime = e.target.dataset.endTime;
+
+        document.getElementById("modal-username").textContent = username;
+        document.getElementById("modal-time").textContent = `${startTime} - ${endTime}`;
+
+        const modal = document.getElementById("reservation-modal");
+        modal.style.display = "block";
+        modal.dataset.reservationId = reservationId;
+    }
+});
+
+document.getElementById("cancel-reservation-btn").addEventListener("click", async function () {
+    const modal = document.getElementById("reservation-modal");
+    const reservationId = modal.dataset.reservationId;
+
+    const confirmed = confirm("Esti sigur ca vrei sa stergi aceasat rezervare?");
+    if (!confirmed) return;
+
+    try {
+        const res = await fetch(`https://bookfield.up.railway.app/cancel-reservation/${reservationId}`, {
+            method: "DELETE"
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            alert("Rezervarea a fost stearsa cu succes.");
+            closeModal();
+            document.getElementById("search-form").dispatchEvent(new Event("submit"));
+        } else {
+            alert("Nu s-a putut sterge rezervarea. Incearca din nou.");
+        }
+    } catch (err) {
+        console.error("Error cancelling reservation:", err);
+        alert("An error occurred.");
+    }
+});
+
+function closeModal() {
+    document.getElementById("reservation-modal").style.display = "none";
+}
