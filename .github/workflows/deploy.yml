@@ -24,15 +24,12 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      # Optional: run tests or linting
-      #- name: Run tests
-      #  run: npm test
-
-      # Optional: build frontend if needed
-      #- name: Build frontend
-      #  run: echo "Add your frontend build commands here"
+      - name: Install Railway CLI
+        run: curl -fsSL https://railway.app/install.sh | bash
 
       - name: Deploy to Railway
-        uses: railwayapp/cli-action@v1
-        with:
-          apiKey: ${{ secrets.RAILWAY_API_KEY }}
+        run: |
+          echo ${{ secrets.RAILWAY_API_KEY }} | railway login --token
+          railway up --service=backend
+        env:
+          RAILWAY_API_KEY: ${{ secrets.RAILWAY_API_KEY }}
