@@ -24,12 +24,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Install Railway CLI
-        run: curl -fsSL https://railway.app/install.sh | bash
-
       - name: Deploy to Railway
-        run: |
-          echo ${{ secrets.RAILWAY_API_KEY }} | railway login --token
-          railway up --service=backend
+        uses: docker://ghcr.io/railwayapp/cli:latest
+        with:
+          args: |
+            link --project ${{ secrets.RAILWAY_PROJECT_ID }} --service backend
+            up --service backend
         env:
           RAILWAY_API_KEY: ${{ secrets.RAILWAY_API_KEY }}
