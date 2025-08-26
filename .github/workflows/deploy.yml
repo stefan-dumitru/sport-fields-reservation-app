@@ -13,41 +13,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Set up Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '22'
 
-      # Install backend dependencies
-      - name: Install backend dependencies
+      - name: Install dependencies
         run: npm install
 
-      # Optional: Run backend tests
-      # - name: Run tests
-      #   run: npm test
-
-      # Install Railway CLI
       - name: Install Railway CLI
         run: curl -fsSL https://railway.app/install.sh | sh
 
-      # Deploy backend
       - name: Deploy backend
         env:
           RAILWAY_API_KEY: ${{ secrets.RAILWAY_API_KEY }}
         run: |
-          railway login --apiKey $RAILWAY_API_KEY
           railway up --service backend
 
-      # Deploy frontend
       - name: Deploy frontend
         env:
           RAILWAY_API_KEY: ${{ secrets.RAILWAY_API_KEY }}
         run: |
           cd frontend-files
-          railway login --apiKey $RAILWAY_API_KEY
           railway up --service frontend
