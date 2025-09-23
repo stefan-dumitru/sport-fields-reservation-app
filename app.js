@@ -7,6 +7,8 @@ const cors = require('cors');
 
 const moment = require('moment-timezone');
 
+const PUBLIC_URL = process.env.PUBLIC_URL;
+
 // const { Translate } = require("@google-cloud/translate").v2;
 
 const crypto = require('crypto');
@@ -176,7 +178,7 @@ app.post('/reset-password', (req, res) => {
                 return res.json({ success: false, message: 'Failed to generate reset token.' });
             }
 
-            const resetLink = `https://rezervareteren.ro/set-new-password?token=${resetToken}`;
+            const resetLink = `${PUBLIC_URL}/set-new-password?token=${resetToken}`;
             const mailOptions = {
                 from: process.env.USER_EMAIL,
                 to: email,
@@ -817,8 +819,8 @@ app.post("/create-checkout-session", async (req, res) => {
                 quantity: 1,
             }],
             mode: "payment",
-            success_url: "https://rezervareteren.ro/fields-map.html?payment=success",
-            cancel_url: "https://rezervareteren.ro/fields-map.html?payment=cancel",
+            success_url: `${PUBLIC_URL}/fields-map.html?payment=success`,
+            cancel_url: `${PUBLIC_URL}/fields-map.html?payment=cancel`,
         });
 
         res.json({ url: session.url });
@@ -843,8 +845,8 @@ app.post("/create-checkout-session-new", async (req, res) => {
                 quantity: 1,
             }],
             mode: "payment",
-            success_url: "https://rezervareteren.ro/search-fields.html?payment=success",
-            cancel_url: "https://rezervareteren.ro/search-fields.html?payment=cancel",
+            success_url: `${PUBLIC_URL}/search-fields.html?payment=success`,
+            cancel_url: `${PUBLIC_URL}/search-fields.html?payment=cancel`,
         });
 
         res.json({ url: session.url });
