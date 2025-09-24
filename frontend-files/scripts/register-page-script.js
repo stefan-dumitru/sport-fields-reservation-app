@@ -1,3 +1,26 @@
+async function getBackendUrl() {
+    try {
+        let backendBaseUrl = "";
+
+        if (window.location.hostname.includes("rezervareteren.up.railway.app")) {
+            backendBaseUrl = "https://backend-production-47d1.up.railway.app";
+        }
+
+        const response = await fetch(`${backendBaseUrl}/get-backend-route`);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch backend URL: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data.backendUrl;
+    } catch (error) {
+        console.error("Error fetching backend URL:", error);
+        return null;
+    }
+}
+
+const BACKEND_URL = await getBackendUrl();
+
 function validatePasswordComplexity() {
     const password = document.getElementById('password').value;
     document.getElementById('uppercase').classList.toggle('met', /[A-Z]/.test(password));
@@ -70,7 +93,7 @@ async function register(event) {
 
     if (validateAccount(email, parola, confirmaParola)) {
         try {
-            const response = await fetch('https://bookfield.up.railway.app/register', {
+            const response = await fetch(`${BACKEND_URL}/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, nume, prenume, parola })

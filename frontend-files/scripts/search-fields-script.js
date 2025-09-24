@@ -1,3 +1,26 @@
+async function getBackendUrl() {
+    try {
+        let backendBaseUrl = "";
+
+        if (window.location.hostname.includes("rezervareteren.up.railway.app")) {
+            backendBaseUrl = "https://backend-production-47d1.up.railway.app";
+        }
+
+        const response = await fetch(`${backendBaseUrl}/get-backend-route`);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch backend URL: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data.backendUrl;
+    } catch (error) {
+        console.error("Error fetching backend URL:", error);
+        return null;
+    }
+}
+
+const BACKEND_URL = await getBackendUrl();
+
 let isDragging = false;
 let startCell = null;
 let selectedCells = [];
@@ -38,7 +61,7 @@ function isReserved(startHour, reservations) {
 
 async function fetchFieldReservations(fieldId) {
     try {
-        const response = await fetch(`https://bookfield.up.railway.app/get-field-reservations/${fieldId}`);
+        const response = await fetch(`${BACKEND_URL}/get-field-reservations/${fieldId}`);
         const data = await response.json();
 
         data.reservations.forEach(reservation => {
@@ -81,7 +104,7 @@ document.getElementById("search-form").addEventListener("submit", async (event) 
 
     let fields = [];
     try {
-        const response = await fetch("https://bookfield.up.railway.app/search-fields", {
+        const response = await fetch(`${BACKEND_URL}/search-fields`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ sport, sector }),
@@ -200,7 +223,7 @@ document.getElementById("search-form").addEventListener("submit", async (event) 
                             const currentFieldId = cell.getAttribute("data-field-id");
 
                             try {
-                                const response = await fetch(`https://bookfield.up.railway.app/get-user-reservations?username=${username}&date=${selectedDate}`);
+                                const response = await fetch(`${BACKEND_URL}/get-user-reservations?username=${username}&date=${selectedDate}`);
                                 const userReservations = await response.json();
         
                                 if (userReservations.result.length >= 3) {
@@ -216,7 +239,7 @@ document.getElementById("search-form").addEventListener("submit", async (event) 
                             }
 
                             try {
-                                const response = await fetch(`https://bookfield.up.railway.app/get-user-reservations-for-field?username=${username}&date=${selectedDate}&fieldId=${currentFieldId}`);
+                                const response = await fetch(`${BACKEND_URL}/get-user-reservations-for-field?username=${username}&date=${selectedDate}&fieldId=${currentFieldId}`);
                                 const fieldReservations = await response.json();
                                                         
                                 if (fieldReservations.result.length >= 1) {
@@ -247,7 +270,7 @@ document.getElementById("search-form").addEventListener("submit", async (event) 
                                 };
         
                                 try {
-                                    const response = await fetch("https://bookfield.up.railway.app/make-reservation", {
+                                    const response = await fetch(`${BACKEND_URL}/make-reservation`, {
                                             method: "POST",
                                             headers: { "Content-Type": "application/json" },
                                             body: JSON.stringify(reservationDetails),
@@ -259,7 +282,7 @@ document.getElementById("search-form").addEventListener("submit", async (event) 
                                         alert("Rezervarea a fost facuta cu succes!");
 
                                         try {
-                                            const paymentResponse = await fetch("https://bookfield.up.railway.app/create-checkout-session-new", {
+                                            const paymentResponse = await fetch(`${BACKEND_URL}/create-checkout-session-new`, {
                                                 method: "POST",
                                                 headers: { "Content-Type": "application/json" },
                                                 body: JSON.stringify({

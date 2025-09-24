@@ -1,3 +1,26 @@
+async function getBackendUrl() {
+    try {
+        let backendBaseUrl = "";
+
+        if (window.location.hostname.includes("rezervareteren.up.railway.app")) {
+            backendBaseUrl = "https://backend-production-47d1.up.railway.app";
+        }
+
+        const response = await fetch(`${backendBaseUrl}/get-backend-route`);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch backend URL: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data.backendUrl;
+    } catch (error) {
+        console.error("Error fetching backend URL:", error);
+        return null;
+    }
+}
+
+const BACKEND_URL = await getBackendUrl();
+
 function addHours(date, hours) {
     const newDate = new Date(date);
     newDate.setHours(newDate.getHours() + hours);
@@ -13,7 +36,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     try {
-        const response = await fetch(`https://bookfield.up.railway.app/get-reservations/${username}`);
+        const response = await fetch(`${BACKEND_URL}/get-reservations/${username}`);
         const data = await response.json();
 
         if (data.success && Array.isArray(data.reservations)) {
@@ -52,7 +75,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                         if (confirmCancel) {
                             try {
                                 const cancelResponse = await fetch(
-                                    `https://bookfield.up.railway.app/cancel-reservation/${reservation.id_rezervare}`,
+                                    `${BACKEND_URL}/cancel-reservation/${reservation.id_rezervare}`,
                                     { method: "DELETE" }
                                 );
                                 const cancelData = await cancelResponse.json();
