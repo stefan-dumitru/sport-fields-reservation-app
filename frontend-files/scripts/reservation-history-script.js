@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     try {
-        const response = await fetch(`${BACKEND_URL}/get-reservations/${username}`);
+        const response = await fetch(`https://backend-production-47d1.up.railway.app/get-reservations/${username}`);
         const data = await response.json();
 
         if (data.success && Array.isArray(data.reservations)) {
@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                         if (confirmCancel) {
                             try {
                                 const cancelResponse = await fetch(
-                                    `${BACKEND_URL}/cancel-reservation/${reservation.id_rezervare}`,
+                                    `https://backend-production-47d1.up.railway.app/cancel-reservation/${reservation.id_rezervare}`,
                                     { method: "DELETE" }
                                 );
                                 const cancelData = await cancelResponse.json();

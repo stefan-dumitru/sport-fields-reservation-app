@@ -11,5 +11,3 @@ npm-debug.log*
 # System files
 .DS_Store
 Thumbs.db
-
-frontend-files/config.js

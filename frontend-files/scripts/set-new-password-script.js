@@ -47,7 +47,7 @@ async function setNewPassword(event) {
 
     if (validatePasswords(password, confirmPassword)) {
         try {
-            const response = await fetch(`${BACKEND_URL}/confirm-password-reset`, {
+            const response = await fetch(`https://backend-production-47d1.up.railway.app/confirm-password-reset`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ token, password })
