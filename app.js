@@ -9,6 +9,11 @@ const moment = require('moment-timezone');
 
 const PUBLIC_URL = process.env.PUBLIC_URL;
 
+const allowedOrigins = [
+  "https://rezervareteren.up.railway.app",
+  "https://rezervareteren.ro",
+];
+
 // const { Translate } = require("@google-cloud/translate").v2;
 
 const crypto = require('crypto');
@@ -22,7 +27,25 @@ const PORT = process.env.PORT;
 const Stripe = require('stripe');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
-app.use(cors());
+// app.use(cors());
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
+
+app.options("*", cors());
+
 app.use(express.json());
 
 app.use(bodyParser.json());
