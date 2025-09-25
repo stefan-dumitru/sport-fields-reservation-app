@@ -17,10 +17,6 @@ const nodemailer = require('nodemailer');
 const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT;
-
-const Stripe = require('stripe');
-const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 // app.use(cors());
 app.use(cors({
@@ -34,6 +30,11 @@ app.options('*', cors({
     methods: ['GET','POST','PUT','DELETE','OPTIONS'],
     credentials: true
 }));
+
+const PORT = process.env.PORT;
+
+const Stripe = require('stripe');
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 app.use(express.json());
 
