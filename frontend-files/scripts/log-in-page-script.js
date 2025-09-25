@@ -12,7 +12,7 @@ async function login(event) {
     const errorMessage = document.getElementById('error-message');
 
     try {
-        const response = await fetch(`https://backend-production-47d1.up.railway.app/login`, {
+        const response = await fetch(`https://bookfield.up.railway.app/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })

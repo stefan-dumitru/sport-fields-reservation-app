@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     try {
-        const response = await fetch(`https://backend-production-47d1.up.railway.app/get-user-profile/${username}`);
+        const response = await fetch(`https://bookfield.up.railway.app/get-user-profile/${username}`);
         const data = await response.json();
 
         if (data.success) {
