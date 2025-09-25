@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function fetchMyFields(username) {
     try {
-        const response = await fetch(`https://bookfield.up.railway.app/get-owner-sports-fields/${username}`);
+        const response = await fetch(`https://backend-production-47d1.up.railway.app/get-owner-sports-fields/${username}`);
         const fields = await response.json();
 
         const tableBody = document.getElementById('pending-fields-body');
@@ -47,7 +47,7 @@ async function saveField(id_teren, button) {
     const schedule = row.querySelector('.schedule-input').value;
 
     try {
-        const response = await fetch(`https://bookfield.up.railway.app/update-field`, {
+        const response = await fetch(`https://backend-production-47d1.up.railway.app/update-field`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id_teren, pret_ora: price, program: schedule })
@@ -71,7 +71,7 @@ async function deleteField(id_teren) {
     if (!confirmDelete) return;
 
     try {
-        const response = await fetch(`https://bookfield.up.railway.app/delete-field/${id_teren}`, {
+        const response = await fetch(`https://backend-production-47d1.up.railway.app/delete-field/${id_teren}`, {
             method: 'DELETE'
         });
 

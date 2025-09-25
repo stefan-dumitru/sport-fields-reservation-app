@@ -25,7 +25,7 @@ function isReserved(startHour, reservations) {
 
 async function fetchFieldReservations(fieldId) {
     try {
-        const response = await fetch(`https://bookfield.up.railway.app/get-field-reservations/${fieldId}`);
+        const response = await fetch(`https://backend-production-47d1.up.railway.app/get-field-reservations/${fieldId}`);
         const data = await response.json();
 
         data.reservations.forEach(reservation => {
@@ -66,7 +66,7 @@ document.getElementById("search-form").addEventListener("submit", async (event) 
 
     let fields = [];
     try {
-        const response = await fetch(`https://bookfield.up.railway.app/get-owner-fields`, {
+        const response = await fetch(`https://backend-production-47d1.up.railway.app/get-owner-fields`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ username: localStorage.getItem("username") })
@@ -182,7 +182,7 @@ document.getElementById("cancel-reservation-btn").addEventListener("click", asyn
     if (!confirmed) return;
 
     try {
-        const res = await fetch(`https://bookfield.up.railway.app/cancel-reservation/${reservationId}`, {
+        const res = await fetch(`https://backend-production-47d1.up.railway.app/cancel-reservation/${reservationId}`, {
             method: "DELETE"
         });
 

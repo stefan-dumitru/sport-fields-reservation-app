@@ -17,7 +17,7 @@ async function resetPassword(event) {
         alertMessageInvalidEmail.style.display = 'none';
 
         try {
-            const response = await fetch(`https://bookfield.up.railway.app/reset-password`, {
+            const response = await fetch(`https://backend-production-47d1.up.railway.app/reset-password`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email })
