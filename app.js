@@ -22,7 +22,19 @@ const PORT = process.env.PORT;
 const Stripe = require('stripe');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
-app.use(cors());
+// app.use(cors());
+app.use(cors({
+    origin: 'https://rezervareteren.up.railway.app',
+    methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+    credentials: true
+}));
+
+app.options('*', cors({
+    origin: 'https://rezervareteren.up.railway.app',
+    methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+    credentials: true
+}));
+
 app.use(express.json());
 
 app.use(bodyParser.json());
