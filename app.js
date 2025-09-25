@@ -17,19 +17,7 @@ const nodemailer = require('nodemailer');
 const path = require('path');
 
 const app = express();
-
-// app.use(cors());
-app.use(cors({
-    origin: 'https://rezervareteren.up.railway.app',
-    methods: ['GET','POST','PUT','DELETE','OPTIONS'],
-    credentials: true
-}));
-
-app.options('*', cors({
-    origin: 'https://rezervareteren.up.railway.app',
-    methods: ['GET','POST','PUT','DELETE','OPTIONS'],
-    credentials: true
-}));
+app.use(cors());
 
 const PORT = process.env.PORT;
 
