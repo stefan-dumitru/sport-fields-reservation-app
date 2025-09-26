@@ -70,7 +70,7 @@ async function register(event) {
 
     if (validateAccount(email, parola, confirmaParola)) {
         try {
-            const response = await fetch(`https://backend-production-47d1.up.railway.app/register`, {
+            const response = await fetch(`https://bookfield.up.railway.app/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, nume, prenume, parola })

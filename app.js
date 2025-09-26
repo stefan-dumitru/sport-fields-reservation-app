@@ -877,10 +877,6 @@ app.get('/my-profile-page', (_req, res) => {
   res.sendFile(path.join(__dirname, 'my-profile.html'));
 });
 
-app.get("/get-backend-route", (_req, res) => {
-  res.json({ backendUrl: process.env.BACKEND_URL });
-});
-
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
